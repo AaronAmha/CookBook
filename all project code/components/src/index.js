@@ -77,6 +77,35 @@ app.get('/login', (req, res) => {
     res.render("pages/login");
 });
 
+// Define a route for /discover
+app.get('/discover', async (req, res) => {
+  console.log("hello");
+  try {
+      const response = await axios({
+          url: 'https://api.spoonacular.com/recipes/complexSearch',
+          method: 'GET',
+          dataType: 'json',
+          headers: {
+              'Accept-Encoding': 'application/json',
+          },
+          params: {
+              apiKey: process.env.API_KEY,
+              query: 'chicken',
+              number: 10  // 'size' should be 'number' for Spoonacular API
+          },
+      });
+
+      const results = response.data.results;
+      console.log(results);
+
+      res.render('pages/discover', { recipes: results });
+  } catch (error) {
+      console.error(error);
+      res.render('pages/discover', { recipes: [], error: 'API call failed' });
+  }
+});
+
+
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
