@@ -103,6 +103,25 @@ app.get('/discover', async (req, res) => {
   }
 });
 
+// Sample route to retrieve and display recipe details
+app.get('/recipe/:id', async (req, res) => {
+  const recipeId = req.params.id;
+
+  try {
+    const response = await axios.get(`https://api.spoonacular.com/recipes/${recipeId}/information`, {
+      params: {
+        includeNutrition: false, // Adjust as needed
+        apiKey:  process.env.API_KEY,
+      },
+    });
+
+    const recipeInfo = response.data;
+    res.render('pages/recipe', { recipeInfo });
+  } catch (error) {
+    console.error(error);
+    res.render('pages/recipe', { recipes: [], error: 'API call failed' });
+  }
+});
 
 
 // *****************************************************

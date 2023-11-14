@@ -25,10 +25,9 @@
                 <h5 class="card-title">
                     <%= recipe.title %>
                 </h5>
-                <p>Cuisine: <%= recipe.servings %>
-                </p>
-            <p>Prepare Time: <%= recipe.readyInMinutes %> minutes</p>
-            <a href="<%= recipe.spoonacularSourceUrl %>" class="btn btn-primary">View Recipe</a>
+                <form action="/recipe/<%= recipe.id %>" method="GET">
+                    <button type="submit" class="btn btn-primary">View Recipe</button>
+                </form>
             </div>
             </div>
             </div>
