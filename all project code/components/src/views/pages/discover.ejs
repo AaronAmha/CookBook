@@ -1,36 +1,40 @@
 <%- include ('../partials/head') %>
-    <%- include ('../partials/menu') %>
+<%- include ('../partials/menu') %>
 
-        <main>
-            <div class="container">
-                <form action="/discover" method="GET">
-                    <!-- THE REST OF YOUR HTML CODE GOES HERE -->
-                    <h1>Discover recipes</h1>
-                    <div class="row">
-                        <!-- Iterate through the recipes and display them as cards -->
-                        <% for (let recipe of recipes) { %>
-                            <div class="col-md-4">
-                                <div class="card">
-                                    <!-- Use recipe.image instead of recipes.images[0].url -->
-                                    <img src="<%= recipe.image %>" class="card-img-top" alt="Recipe Image">
-                                    <div class="card-body">
-                                        <h5 class="card-title">
-                                            <%= recipe.title %>
-                                        </h5>
-                                        <p>Cuisine: <%= recipe.servings %>
-                                        </p>
-
-                                        <p>Prepare Time <%= recipe.readyInMinutes %>
-                                        </p>
-                                        <a href="<%= recipe.spoonacularSourceUrl %>" class="btn btn-primary">View
-                                            Recipe</a>
-                                    </div>
-                                </div>
-                            </div>
-                            <% } %>
-                    </div>
-                </form>
+<main>
+    <div class="container">
+    <h1>Discover recipes</h1>
+    
+    <!-- Search form -->
+    <form action="/discover" method="GET">
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="Search recipes" name="query">
+        <div class="input-group-append">
+            <button class="btn btn-secondary" type="submit">Search</button>
+        </div>
+    </div>
+    </form>
+    
+    <!-- Iterate through the recipes and display them as cards -->
+    <div class="row">
+    <% for (let recipe of recipes) { %>
+        <div class="col-md-4">
+            <div class="card">
+            <img src="<%= recipe.image %>" class="card-img-top" alt="Recipe Image">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <%= recipe.title %>
+                </h5>
+                <p>Cuisine: <%= recipe.servings %>
+                </p>
+            <p>Prepare Time: <%= recipe.readyInMinutes %> minutes</p>
+            <a href="<%= recipe.spoonacularSourceUrl %>" class="btn btn-primary">View Recipe</a>
             </div>
-        </main>
+            </div>
+            </div>
+            <% } %>
+                </div>
+</div>
+</main>
 
-        <%- include ('../partials/footer') %>
+<%- include ('../partials/footer') %>

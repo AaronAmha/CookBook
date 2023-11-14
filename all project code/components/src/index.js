@@ -77,33 +77,32 @@ app.get('/login', (req, res) => {
     res.render("pages/login");
 });
 
-// Define a route for /discover
 app.get('/discover', async (req, res) => {
-  console.log("hello");
   try {
-      const response = await axios({
-          url: 'https://api.spoonacular.com/recipes/complexSearch',
-          method: 'GET',
-          dataType: 'json',
-          headers: {
-              'Accept-Encoding': 'application/json',
-          },
-          params: {
-              apiKey: process.env.API_KEY,
-              query: 'chicken',
-              number: 10  // 'size' should be 'number' for Spoonacular API
-          },
-      });
+    const userQuery = req.query.query || ''; // Retrieve the query parameter from the URL
+    const response = await axios({
+      url: 'https://api.spoonacular.com/recipes/complexSearch',
+      method: 'GET',
+      dataType: 'json',
+      headers: {
+        'Accept-Encoding': 'application/json',
+      },
+      params: {
+        apiKey: process.env.API_KEY,
+        query: userQuery,
+        number: 10,
+      },
+    });
+    const results = response.data.results;
+    console.log(results);
 
-      const results = response.data.results;
-      console.log(results);
-
-      res.render('pages/discover', { recipes: results });
+    res.render('pages/discover', { recipes: results, userQuery });
   } catch (error) {
-      console.error(error);
-      res.render('pages/discover', { recipes: [], error: 'API call failed' });
+    console.error(error);
+    res.render('pages/discover', { recipes: [], error: 'API call failed' });
   }
 });
+
 
 
 // *****************************************************
