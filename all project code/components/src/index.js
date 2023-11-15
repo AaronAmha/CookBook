@@ -77,6 +77,53 @@ app.get('/login', (req, res) => {
     res.render("pages/login");
 });
 
+app.get('/discover', async (req, res) => {
+  try {
+    const userQuery = req.query.query || ''; // Retrieve the query parameter from the URL
+    const response = await axios({
+      url: 'https://api.spoonacular.com/recipes/complexSearch',
+      method: 'GET',
+      dataType: 'json',
+      headers: {
+        'Accept-Encoding': 'application/json',
+      },
+      params: {
+        apiKey: process.env.API_KEY,
+        query: userQuery,
+        number: 10,
+      },
+    });
+    const results = response.data.results;
+    console.log(results);
+
+    res.render('pages/discover', { recipes: results, userQuery });
+  } catch (error) {
+    console.error(error);
+    res.render('pages/discover', { recipes: [], error: 'API call failed' });
+  }
+});
+
+// Sample route to retrieve and display recipe details
+app.get('/recipe/:id', async (req, res) => {
+  const recipeId = req.params.id;
+
+  try {
+    const response = await axios.get(`https://api.spoonacular.com/recipes/${recipeId}/information`, {
+      params: {
+        includeNutrition: false, // Adjust as needed
+        apiKey:  process.env.API_KEY,
+      },
+    });
+
+    const recipeInfo = response.data;
+    res.render('pages/recipe', { recipeInfo });
+  } catch (error) {
+    console.error(error);
+    res.render('pages/recipe', { recipes: [], error: 'API call failed' });
+  }
+});
+
+
 // *****************************************************
 // <!-- Section 5 : Start Server-->
 // *****************************************************
