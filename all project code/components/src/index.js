@@ -30,6 +30,8 @@ const user = {
   password: undefined
 };
 
+var testMessage = '';
+
 // test your database
 db.connect()
   .then(obj => {
@@ -72,10 +74,145 @@ app.get('/welcome', (req, res) => {
     res.json({status: 'success', message: 'Welcome!'});
 });
 
-app.get('/login', (req, res) => {
-    //do something
-    res.render("pages/login");
+app.get("/", (req, res) => {
+  res.redirect("/login");
 });
+
+
+app.get('/login', (req, res) => {
+//do something
+res.render("pages/login");
+});
+
+app.get('/register', (req, res) => {
+
+  res.render('pages/register');
+});
+
+// Register
+app.post('/register', async (req, res) => {
+  //hash the password using bcrypt library
+  const hash = await bcrypt.hash(req.body.password, 10);
+  const username = req.body.username;
+  const query = "INSERT INTO users (username, password) VALUES ($1, $2) returning * ;";
+
+  // To-DO: Insert username and hashed password into the 'users' table
+  db.any(query, [
+    username,
+    hash
+  ])
+    // if query execution succeeds
+    // send success message
+    .then(function (data) {
+      res.redirect("/login");
+    })
+    // if query execution fails
+    // send error message
+    .catch(function (err) {
+      res.redirect("/register");
+      return console.log(err);
+    });
+});
+
+// Login
+app.post('/login', async (req, res) => {
+// check if password from request matches with password in DB
+const username = req.body.username;
+const query = "select * from users where users.username = $1";
+user.password = '';
+await db.one(query, [
+  username,
+])
+  // if query execution succeeds
+  // send success message
+  .then(function (data) {
+  
+    user.password = data.password;
+    user.username = username;
+  })
+  // if query execution fails
+  // send error message
+  .catch(function (err) {
+    res.redirect("/register");
+    return console.log(err);
+  });
+  const match = await bcrypt.compare(req.body.password, user.password);
+  if (!match)
+  {
+    res.render("pages/login", {
+      message: "Incorrect Username or Password",
+      error: true});
+  }
+  else
+  {
+    req.session.user = user;
+    req.session.save();
+    res.redirect("/discover");
+  }
+});
+
+// Authentication Middleware.
+const auth = (req, res, next) => {
+if (!req.session.user) {
+  // Default to login page.
+  return res.redirect('/login');
+}
+next();
+};
+
+app.get("/logout", (req, res) => {
+  req.session.destroy();
+  res.render("pages/login", {
+    message: "Logged Out Successfully!"
+  });
+});
+
+app.get('/discover', async (req, res) => {
+  try {
+    const userQuery = req.query.query || ''; // Retrieve the query parameter from the URL
+    const response = await axios({
+      url: 'https://api.spoonacular.com/recipes/complexSearch',
+      method: 'GET',
+      dataType: 'json',
+      headers: {
+        'Accept-Encoding': 'application/json',
+      },
+      params: {
+        apiKey: process.env.API_KEY,
+        query: userQuery,
+        number: 10,
+      },
+    });
+    const results = response.data.results;
+    console.log(results);
+
+    res.render('pages/discover', { recipes: results, userQuery });
+  } catch (error) {
+    console.error(error);
+    res.render('pages/discover', { recipes: [], error: 'API call failed' });
+  }
+});
+
+// Sample route to retrieve and display recipe details
+app.get('/recipe/:id', async (req, res) => {
+  const recipeId = req.params.id;
+
+  try {
+    const response = await axios.get(`https://api.spoonacular.com/recipes/${recipeId}/information`, {
+      params: {
+        includeNutrition: false, // Adjust as needed
+        apiKey:  process.env.API_KEY,
+      },
+    });
+
+    const recipeInfo = response.data;
+    res.render('pages/recipe', { recipeInfo });
+  } catch (error) {
+    console.error(error);
+    res.render('pages/recipe', { recipes: [], error: 'API call failed' });
+  }
+});
+
 
 // *****************************************************
 // <!-- Section 5 : Start Server-->

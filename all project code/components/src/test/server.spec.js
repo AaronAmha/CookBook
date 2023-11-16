@@ -25,4 +25,28 @@ describe('Server!', () => {
 
   // ===========================================================================
   // TO-DO: Part A Login unit test case
+
+it('positive : /login', done => {
+  chai
+    .request(server)
+    .post('/login')
+    .send({username: 'andrew', password: 'password'})
+    .end((err, res) => {
+      expect(res).to.have.status(200);
+      done();
+    });
+});
+
+it('Negative : /login. Checking invalid name', done => {
+  chai
+    .request(server)
+    .post('/login')
+    .send({username: 'not username', password: 'password'})
+    .end((err, res) => {
+      expect(res).to.have.status(200);
+      done();
+    });
+});
+
+
 });
