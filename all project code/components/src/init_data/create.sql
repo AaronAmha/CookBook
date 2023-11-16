@@ -5,4 +5,4 @@ CREATE TABLE users (
 );
 
 insert into users (username, password) values 
-("andrew", "password");
+("andrew", "password") returning * ;
