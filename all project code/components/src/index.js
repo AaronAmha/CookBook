@@ -30,6 +30,8 @@ const user = {
   password: undefined
 };
 
+var testMessage = '';
+
 // test your database
 db.connect()
   .then(obj => {
@@ -102,7 +104,6 @@ app.post('/register', async (req, res) => {
     // if query execution succeeds
     // send success message
     .then(function (data) {
-      
       res.redirect("/login");
     })
     // if query execution fails
@@ -125,6 +126,7 @@ await db.one(query, [
   // if query execution succeeds
   // send success message
   .then(function (data) {
+  
     user.password = data.password;
     user.username = username;
   })
@@ -159,10 +161,10 @@ next();
 };
 
 app.get("/logout", (req, res) => {
-req.session.destroy();
-res.render("pages/login", {
-  message: "Logged Out Successfully!"
-});
+  req.session.destroy();
+  res.render("pages/login", {
+    message: "Logged Out Successfully!"
+  });
 });
 
 app.get('/discover', async (req, res) => {
