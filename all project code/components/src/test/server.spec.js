@@ -25,4 +25,56 @@ describe('Server!', () => {
 
   // ===========================================================================
   // TO-DO: Part A Login unit test case
+
+it('positive : /login', done => {
+  chai
+    .request(server)
+    .post('/login')
+    .send({username: 'andrew', password: 'password'})
+    .end((err, res) => {
+      expect(res).to.have.status(200);
+      done();
+    });
 });
+
+it('Negative : /login. Checking invalid name', done => {
+  chai
+    .request(server)
+    .post('/login')
+    .send({username: 'not username', password: 'password'})
+    .end((err, res) => {
+      expect(res).to.have.status(200);
+      done();
+    });
+});
+
+
+
+ // Discover Page test cases
+ describe('Discover API Tests', () => {
+  // Positive Test Case
+  it('Positive: /discover with valid query', done => {
+    chai
+      .request(server)
+      .get('/discover')
+      .query({ query: 'chicken' }) 
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        done();
+      });
+  });
+
+     // Negative Test Case
+     it('Negative: /discover with invalid query', done => {
+      chai
+        .request(server)
+        .get('/discover')
+        .query({ query: 'invalidqueryterm12345' }) 
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          done();
+        });
+    });
+});
+});
+

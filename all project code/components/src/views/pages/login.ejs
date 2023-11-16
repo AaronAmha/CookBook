@@ -2,32 +2,21 @@
 <%- include ('../partials/menu') %>
 
 <main>
-  <div class="container">
-    <!-- THE REST OF YOUR HTML CODE GOES HERE -->
-    <h1>
-        Login
-    </h1>
-    <div class="col"><%- include ('../partials/message') %></div>
-    <form action="/login" method="POST"> 
-
-        <div id ="username" class="form-group">
-            <label for="username" class="col-sm-2 col-form-label">Username</label>
-            <input id ="username" type="text" name="username" />
-        </div>
-
-        <div id ="password" class="form-group">
-            <label for="password" class="col-sm-2 col-form-label">Password</label>
-            <input id ="password" type="text" name="password" />
-        </div>
-
-
-        <button type="submit" class="btn btn-primary">Login</button>
-    </form>
-    <p>
-      Don't have an account?
-      <a href="/register">Register</a>
-    </p>
-  </div>
-</main>
+    <div class="container">
+      <!-- THE REST OF YOUR HTML CODE GOES HERE -->
+      <h3>Login</h3>
+      <div class="col"><%- include ('../partials/message') %></div>
+      <form action="/login" method="POST">
+              <label for="username">Username:</label>
+              <input type="text" class = "form-control" id="username" name="username" required/>
+              <label for="password">Password:</label>
+              <input type="password" class = "form-control" id="password" name="password" required/><hr>
+      
+              <input type="submit" style = "float: right;" class = "btn btn-primary" value = "Login" /> </p>
+      </form>
+    
+    <p>Don't have an account? <a href="/register">Register</a> 
+    </div>
+  </main>
 
 <%- include ('../partials/footer') %>

@@ -6,3 +6,6 @@ CREATE TABLE users (
     email VARCHAR(200) NOT NULL,
     password CHAR(60) NOT NULL
 );
+
+insert into users (username, password) values 
+("andrew", "password") returning * ;
