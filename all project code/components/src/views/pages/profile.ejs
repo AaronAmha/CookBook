@@ -1,0 +1,37 @@
+%- include ('../partials/header') %> 
+<%- include ('../partials/menu') %>
+
+<main>
+    <div class="container">
+        <!-- THE REST OF YOUR HTML CODE GOES HERE -->
+    <h1><centre>Welcome <%= first_name %></centre></h1>
+
+    <table class = "table">
+        <thead>
+            <tr>
+                <th>FIRST NAME</th>
+                <th><%= first_name %></th>
+            </tr>
+            <tr>
+                <th>LAST NAME </th>
+                <th><%=last_name%></th>
+            </tr>
+            <tr>
+                <th>EMAIL NAME</th>
+                <th><%= email %></th>
+            
+            </tr>
+            <tr>
+                <th>DATE OF BIRTH:</th>
+                <th><%=dob%></th>
+            </tr>
+            <tr>
+                <th>USERNAME</th>
+                <th><%= username %></th>
+            </tr>
+        </thead>
+    </table>
+    </div> 
+    </main>
+
+<%- include ('../partials/footer') %>
