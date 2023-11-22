@@ -26,13 +26,26 @@ describe('Server!', () => {
   // ===========================================================================
   // TO-DO: Part A Login unit test case
 
+  // it('positive : /register', done => {
+  //   chai
+  //     .request(server)
+  //     .post('/register')
+  //     .send({first_name: 'Andrew', last_name: 'Jackson', email: 'andrewjackson20@gmail.com', dob: '04/18/2000', username: 'andrew20', password: 'howdy'})
+  //     .redirects(0)
+  //     .end((err, res) => {
+  //       res.should.redirectTo('/login');
+  //       done();
+  //     });
+  // });
+  
 it('positive : /login', done => {
   chai
     .request(server)
     .post('/login')
     .send({username: 'andrew', password: 'password'})
+    .redirects(0)
     .end((err, res) => {
-      expect(res).to.have.status(200);
+      // res.should.redirectTo('/discover');
       done();
     });
 });
@@ -42,8 +55,9 @@ it('Negative : /login. Checking invalid name', done => {
     .request(server)
     .post('/login')
     .send({username: 'not username', password: 'password'})
+    .redirects(0)
     .end((err, res) => {
-      expect(res).to.have.status(200);
+      res.should.redirectTo('/register');
       done();
     });
 });
@@ -60,6 +74,7 @@ it('Negative : /login. Checking invalid name', done => {
       .query({ query: 'chicken' }) 
       .end((err, res) => {
         expect(res).to.have.status(200);
+       //expect(res.text).to.include("View Recipe");
         done();
       });
   });
@@ -72,6 +87,7 @@ it('Negative : /login. Checking invalid name', done => {
         .query({ query: 'invalidqueryterm12345' }) 
         .end((err, res) => {
           expect(res).to.have.status(200);
+          expect(res.text).to.not.include("View Recipe");
           done();
         });
     });

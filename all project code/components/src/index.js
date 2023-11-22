@@ -10,6 +10,13 @@ const session = require('express-session'); // To set the session object. To sto
 const bcrypt = require('bcrypt'); //  To hash passwords
 const axios = require('axios'); // To make HTTP requests from our server. We'll learn more about it in Part B.
 
+// File System and Upload Modules
+const fs = require('fs');
+const fileUpload = require('express-fileupload');
+app.use(fileUpload());
+//middlewares
+// const fileUpload = require('express-fileupload');
+// const multer = require('multer');
 // *****************************************************
 // <!-- Section 2 : Connect to DB -->
 // *****************************************************
@@ -28,8 +35,31 @@ const db = pgp(dbConfig);
 const user = {
   username: undefined,
   password: undefined
+  // first_name: undefined,
+  // last_name: undefined,
+  // email: undefined,
+  // dob: undefined
+};
+const chef = {
+  username: undefined,
+  password: undefined,
+  first_name: undefined,
+  last_name: undefined,
+  email: undefined,
+  dob: undefined
 };
 
+const recipe = {
+  username: undefined,
+  recipeName: undefined,
+  file_name: undefined,
+  file_path: undefined,
+  instruction: undefined,
+  ingredients: undefined,
+  quantity: undefined,
+  units: undefined,
+  uploadTime: undefined
+};
 var testMessage = '';
 
 // test your database
@@ -42,6 +72,14 @@ db.connect()
     console.log('ERROR:', error.message || error);
   });
 
+
+  // const gallery = multer.diskStorage
+  // ({
+  //     destination: function(req,file, cb) 
+  //     {
+
+  //     }
+  // })
 // *****************************************************
 // <!-- Section 3 : App Settings -->
 // *****************************************************
@@ -63,6 +101,9 @@ app.use(
     extended: true,
   })
 );
+
+// app.use(fileUpload());
+// app.use(express.static('../all project code/components/src/views/pages'));
 
 // *****************************************************
 // <!-- Section 4 : API Routes -->
@@ -87,15 +128,19 @@ app.get('/register', (req, res) => {
 // Register
 app.post('/register', async (req, res) => {
    //hash the password using bcrypt library
-   const hash = await bcrypt.hash(req.body.password, 10);
+   const {first_name, last_name, email, dob, username, password} = req.body;
+   const hash = await bcrypt.hash(password, 10);
+   
    // To-DO: Insert username and hashed password into the 'users' table
    try 
    {
-       const query = await db.query('INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *', [req.body.username, hash]);
-       res.redirect('/login');
+      const user = await db.query('INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *', [username, hash]);
+      const chef = await db.query('INSERT INTO chefs (username, password, first_name, last_name, email, dob) VALUES ($1, $2, $3, $4, $5, $6) RETURNING * ', [username, hash, first_name, last_name, email, dob]);
+      res.redirect('/login');
    } catch (error)
    {
-       res.redirect('/register');
+      console.error(error);
+      res.redirect('/register');
    }
  });
 //   //hash the password using bcrypt library
@@ -120,33 +165,34 @@ app.post('/register', async (req, res) => {
 //       return console.log(err);
 //     });
 // });
-
 app.get('/login', (req, res) => {
   //do something
   res.render("pages/login");
   });
-// Login
-app.post('/login', async (req, res) => {
-  // const user = await db.query('SELECT password FROM users WHERE username = $1', [req.body.username]);   
-// }
-// Use bcrypt.compare to encrypt the password entered from the
-// user and compare if the entered password is the same as the 
-// registered one. This function returns a boolean value.
+app.post('/login', async(req, res) => {
   try
   {
-      const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [req.body.username]);   
-      const match = await bcrypt.compare(req.body.password, user.password);
-      if (!match)
-      {
-          // redirect to login page!!
-          res.render('../views/pages/login', { message: 'Incorrect username or password.'});    
-      }
-      else
-      {
-          req.session.user = user;
-          req.session.save();
-          res.redirect('/discover');
-      }    
+    const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [req.body.username]);
+    const chef = await db.oneOrNone('SELECT * FROM chefs WHERE username = $1', [req.body.username]);
+    if (!user)
+    {
+      res.redirect('/register');
+      return;
+    }
+
+    const match = await bcrypt.compare(req.body.password, user.password);
+    if (!match)
+    {
+        // redirect to login page!!
+        res.render('../views/pages/login', { message: 'Incorrect username or password.'});    
+    }
+    else
+    {
+        req.session.user = user;
+        req.session.chef = chef;
+        req.session.save();
+        res.redirect('/discover');
+    }    
   // If the password is incorrect, throw an error stating
   // "Incorrect username or password."  
   }catch(err)
@@ -156,41 +202,6 @@ app.post('/login', async (req, res) => {
       res.redirect('/register');
   }
 });
-// check if password from request matches with password in DB
-// const username = req.body.username;
-// const query = "select * from users where users.username = $1";
-// user.password = '';
-// await db.one(query, [
-//   username,
-// ])
-//   // if query execution succeeds
-//   // send success message
-//   .then(function (data) {
-  
-//     user.password = data.password;
-//     user.username = username;
-//   })
-//   // if query execution fails
-//   // send error message
-//   .catch(function (err) {
-//     res.redirect("/register");
-//     return console.log(err);
-//   });
-//   const match = await bcrypt.compare(req.body.password, user.password);
-//   if (!match)
-//   {
-//     res.render("pages/login", {
-//       message: "Incorrect Username or Password",
-//       error: true});
-//   }
-//   else
-//   {
-//     req.session.user = user;
-//     req.session.save();
-//     res.redirect("/discover");
-//   }
-// });
-
 // Authentication Middleware.
 const auth = (req, res, next) => {
 if (!req.session.user) {
@@ -199,9 +210,282 @@ if (!req.session.user) {
 }
 next();
 };
-//authentication required
+// //authentication required
+app.use(auth);
+//   //do something
+//   res.render("pages/login");
+//   });
+// // Login
+// app.post('/login', async (req, res) => {
+
+// try{
+//     const {username, password} = req.body;
+//     const search = "SELECT * FROM users WHERE username = $1";
+//     const userExists = await db.oneOrNone(search, [username]);  
+
+//     if (!userExists)
+//     {
+//       console.log(error);
+//       res.redirect('/register');
+//       return;
+//     } 
+
+//     const match = await bcrypt.compare(password, userExists.password);
+//     if (!match)
+//     {
+//         // redirect to login page!!
+//         console.log(error);
+//         res.render('../views/pages/login', { message: 'Incorrect username or password.'});  
+//         return;  
+//     }
+    
+//     req.session.user = 
+//     {
+//       id: userExists.id, 
+//       username: userExists.username,
+//       first_name: userExists.first_name,
+//       last_name: userExists.last_name,
+//       email: userExists.email,
+//       dob: userExists.dob
+//     };
+//     // req.session.user = user;
+//     req.session.save();
+//     res.redirect('/discover');
+        
+
+//   } catch(err)
+//   {
+//       // redirect them to the register page!!
+//       console.log(err);
+//       res.redirect('/register');
+//   }
+
+
+
+
+
+
+// app.get('/profile', (req, res) => {
+//   //do something
+//   res.render("pages/profile");
+// });
+app.get('/profile', async(req, res) => {
+  //do something
+  try
+  {
+    const myProfile = await db.oneOrNone('SELECT * FROM chefs WHERE username = $1', [req.session.user.username]);
+    res.render("pages/profile", { chef: myProfile});  
+  }
+  catch(error) {
+    console.error(error);
+  }
+});
+
+
+app.get('/addRecipe', (req, res) => {
+  res.render("pages/addRecipe");
+});
+app.post('/addRecipe', async(req, res) => {
+  const {name, instructions, ingredientCount} = req.body;
+  let ingredients = [];
+
+  for (let x = 0; x < ingredientCount; x++)
+  {
+    let ingredient = req.body["ingredient_" + x];
+    let quantity = req.body["quantity_" + x];
+    let unit = req.body["unit_" + x];
+    
+    if (ingredient && quantity && unit)
+    {
+      ingredients.push({ingredient, quantity, unit});
+    }
+  }
+
+  // https://pqina.nl/blog/upload-image-with-nodejs/
+
+  console.log(req.files);
+  const image = req.files.image;
+  if (!image) 
+  {
+    return res.sendStatus(400);
+  }
+  
+  // Only images
+  // if (!/^image/.test(image.mimetype)) return res.sendStatus(400);
+
+  // // Move image to uploads folder
+  const uploadPath = __dirname + '/uploads/';
+  if (!fs.existsSync(uploadPath)){
+    fs.mkdirSync(uploadPath);
+  }
+  image.mv(uploadPath + image.name);
+
+  const myrecipeName = name;
+  const myinstruction = instructions;
+  const myfile_path = uploadPath + image.name;
+  const myfile_name = image.name;
+  const time = new Date().toISOString();
+
+  // const post = await query('INSERT INTO recipe (username, recipeName, file_name, file_path, instruction, uploadTime) VALUES ($1, $2, $3, $4, $5, $6)', [req.session.user.username, myrecipeName, myfile_name, myfile_path, myinstruction, time]);
+
+  // if(post)
+  // {
+  //   res.render("pages/addRecipe", { message: "Your Recipe Has Succesfully Uploaded!"
+  //   });
+  // }
+  try {
+    const groceries = ingredients.map(item => item.ingredient);
+    const number = ingredients.map(item => item.quantity);
+    const type = ingredients.map(item => item.unit);
+
+    // const recipePost = 'INSERT INTO recipe (username, recipeName, file_name, file_path, instruction, ingredients, quantity, units) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)';
+    const recipePost = await db.query('INSERT INTO recipe (username, recipeName, file_name, file_path, instruction, groceries, number, type, uploadTime) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [req.session.user.username, myrecipeName, myfile_name, myfile_path, myinstruction, groceries, number, type, time]);
+    res.send('Nice');
+    // message: "Your Recipe Has Succesfully Uploaded";
+  }catch (error) {
+    console.error('nah', error);
+  }
+});
+
+app.get('/myRecipes', async(req, res) => {
+  //do something
+  try
+  {
+    const allRecipes = await db.query('SELECT * FROM recipe ORDER BY uploadTime');
+    
+    if (allRecipes.rows.length > 0)
+    {
+      const recipes = allRecipes.rows;
+      res.render("pages/myRecipes", { recipes });  
+    }
+    else {
+      res.render("pages/myRecipes", { recipes: [] });
+    }
+  } catch(error) {
+    console.error(error);
+  }
+});
+
+// app.get('/myrecipe/:name', async(req, res) => {
+//   //do something
+//   const recipeName = req.params.name;
+//   try
+//   {
+    
+//     const recipe = await db.oneOrNone('SELECT * FROM recipe WHERE recipeName = $1', [recipeName]);
+
+    
+
+//     const entireRecipe = viewRecipe.ingredients.map((ingredient, index) => {
+//       return {
+//         ingredient: ingredient,
+//         quantity: viewRecipe.quantity[index], 
+//         unit: viewRecipe.units[index]
+//       };
+//     });
+//     res.render("pages/myrecipe", { recipe, extendedIngredients: entireRecipe });  
+//   }
+//   catch(error) {
+//     console.error(error);
+//   }
+// });
+// app.post("/profile", asyc(req, res) => {
+//   res.render('/profile', { 
+//     first_name: req.session.chefProfile.first_name,
+//     last_name: req.session.chefProfile.last_name,
+//     email: req.session.chefProfile.email,
+//     dob: req.session.chefProfile.dob,
+//     username: req.session.chefProfile.username,
+//   });
+    // const username = req.params.username;
+    // const sql = 'SELECT * FROM users WHERE username = ?';
+
+    // db.query(sql, [username], (err, foundProfile) => {
+    //   if (err) throw err;
+    //   if (foundProfile.length > 0)
+    //   {
+    //     res.render('/profile', {user: foundProfile[0]})
+    //   }
+    // });
+    // const  = {
+    //   first_name: req.params.first_name,
+    //   last_name: req.params.last_name,
+    //   email: req.params.email,
+    // }
+    // res.render("pages/profile", {
+    //   username: req.params.username,
+    //   first_name: req.session.user.first_name,
+    //   last_name: req.session.user.last_name
+
+    // })
+  //   const sql = 'SELECT * FROM users WHERE username = ?';
+  //   db.one(sql, [req.session.username], (error, found) => {
+  //     if(error) throw err;
+
+  //     if (found.length > 0) {
+  //       res.render('/profile', { user: found[0] });
+      
+  //   }
+  // })
+  // res.render('/pages/profile', {
+  //   username: req.session.user.username,
+  //   first_name: req/session.user.first_name,
+  //   last_name: req.session.user.last_name,
+  //   email: req.session.user.email,
+  //   dob: req.session.user.dob,
+  // });   
+
+/*
+app.post("/login", (req, res) => {
+  const email = req.body.email;
+  const username = req.body.username;
+  const query = "select * from students where students.email = $1";
+  const values = [email];
+/ get the student_id based on the emailid
+  db.one(query, values)
+    .then((data) => {
+      user.student_id = data.student_id;
+      user.username = username;
+      user.first_name = data.first_name;
+      user.last_name = data.last_name;
+      user.email = data.email;
+      user.year = data.year;
+      user.major = data.major;
+      user.degree = data.degree;
+
+      req.session.user = user;
+      req.session.save();
+
+      res.redirect("/");
+    })
+    .catch((err) => {
+      console.log(err);
+      res.redirect("/login");
+    });
+});
+
+// Authentication middleware.
+const auth = (req, res, next) => {
+  if (!req.session.user) {
+    return res.redirect("/login");
+  }
+  next();
+};
+
 app.use(auth);
 
+app.get("/", (req, res) => {
+  res.render("pages/home", {
+    username: req.session.user.username,
+    first_name: req.session.user.first_name,
+    last_name: req.session.user.last_name,
+    email: req.session.user.email,
+    year: req.session.user.year,
+    major: req.session.user.major,
+    degree: req.session.user.degree,
+  });
+});
+*/
 
 app.get("/logout", (req, res) => {
   req.session.destroy();

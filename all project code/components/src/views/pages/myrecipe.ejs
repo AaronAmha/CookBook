@@ -1,0 +1,49 @@
+<%- include ('../partials/head') %>
+<%- include ('../partials/menu') %>
+
+<main class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <img src="<%= recipe.file_path %>" alt="Picture of <%= recipe.recipeName %>" class="card-img-top">
+                <div class="card-body">
+                    <h1 class="card-title">
+                        <%= recipe.recipeName %>
+                    </h1>
+                </div>
+            </div>
+                    <!-- <div class="recipe-details">
+                        <p class="card-text">Servings: <%= recipeInfo.servings %>
+                        </p>
+                        <p class="card-text">Ready in: <%= recipeInfo.readyInMinutes %> minutes</p>
+                        Add more details as needed -->
+                    <!-- </div>  -->
+
+            <div class="ingredients mt-4">
+                <h2 style = "text-align: center;">Ingredients:</h2>
+                <div class="list-group">
+                    <% extendedIngredients.forEach((ingredient => { %>
+                        <div class="list-group-item">
+                            <%= ingredient.quantity %> <%= ingredient.unit %> <%= ingredient.ingredient %>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+            <div class="instructions mt-4">
+                <h2>Instructions:</h2>
+                <!-- You can use analyzedInstructions if available, or instructions if not -->
+                    <p><%= recipe.instructions %></p>
+            </div>
+        </div>
+    </div>
+</main>
+<%- include ('../partials/footer') %>   
+<!-- <% function renderInstructions(instructions) { %>
+    <ol>
+        <% instructions.forEach((step)=> { %>
+            <li>
+                <%= step.step %>
+            </li>
+        <% }); %>
+    </ol>
+<% } %> -->

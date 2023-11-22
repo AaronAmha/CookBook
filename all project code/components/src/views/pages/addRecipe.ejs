@@ -1,1 +1,113 @@
-<!-- hi -->
+<%- include ('../partials/head') %>
+<%- include ('../partials/menu') %>
+
+<main>
+    <div class="container my-4" >
+        <h3 class="mb-4">Add a Recipe:</h3>
+
+        <form action="/addRecipe" method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="name" class="form-label">Recipe Name:</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <div id = "inputGroupContainer">
+                <div class="input-group mb-2" style="width: 100%;" id = "inputGroup">
+                <!-- <label for="ingredients" class="form-label">Ingredients:</label>
+                <textarea class="form-control" id="ingredients" name="ingredients" rows="3" required></textarea> -->
+                    <div class = "col me-2">
+                        <span class = "input-group-text">Ingredient Item:</span>
+                        <input type="text" class = "form-control" name = "ingredient_0">
+                    </div>
+                    <div class = "col-2 me-2">
+                        <span class = "input-group-text">Quantity:</span>
+                        <input type="text" class = "form-control" name = "quantity_0">
+                    </div>
+                    <div class = "col">
+                        <span class = "input-group-text">Units:</span>
+                        <select class = "form-select" name = "unit_0">
+                            <option selected></option>
+                            <option value = "1">Units (Quantity)</option>
+                            <hr>
+                            <option value = "2">Teaspoon (tsp)</option>
+                            <option value = "3">Tablespoon (tbsp)</option>
+                            <option value = "4">Fluid Ounce (fl oz)</option>
+                            <option value = "5">Cup (c)</option>
+                            <option value = "6">Pint (pt)</option>
+                            <option value = "7">Quart (qt)</option>
+                            <option value = "8">Gallon (gal)</option>
+                            <option value = "9">Millimeter (ml)</option>
+                            <option value = "10">Liter (L)</option>
+                            <hr>
+                            <option value = "11">Ounce (oz)</option>
+                            <option value = "12">Pound (lb)</option>
+                            <option value = "13">Gram (g)</option>
+                            <option value = "14">Kilogram (kg)</option>
+                            <hr>
+                            <option value = "15">Pinch</option>
+                            <option value = "16">Dash</option>
+                            <option value = "17">Smidgen</option>
+                            <option value = "18">Size (s, m, lg)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+                <div class = "col">
+                    <button type = "button" class = "btn btn-success" id = "addIngredient">Add New Ingredient</button>
+                    <input type = "hidden" id = "ingredientCount" name = "ingredientCount" value = "1">
+                    <button type = "button" class = "btn btn-danger" id = "removeIngredient">Remove Ingredient</button>
+                    <input type = "hidden" id = "ingredientCount" name = "ingredientCount" value = "1">
+                </div>
+           
+            <div class="mb-3">
+                <label for="instructions" class="form-label">Instructions:</label>
+                <textarea class="form-control" id="instructions" name="instructions" rows="5" required></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="image" class="form-label">Recipe Image:</label>
+                <input type="file" class="form-control" id="image" name="image" accept="image/*">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+</main>
+<!-- Add Ingredients Javascript Code -->
+<script>
+document.getElementById('addIngredient').addEventListener('click', function() {
+    var ogIngredient = document.getElementById('inputGroup');
+    var newIngredientClone = ogIngredient.cloneNode(true);
+
+    var ingredientCount = parseInt(document.getElementById('ingredientCount').value);
+
+    var grocery = newIngredientClone.querySelectorAll('input, select');
+    for (var x = 0; x < grocery.length; x++)
+    {
+        var newIngredient = grocery[x];
+        var ingredient_quantity_unit  = newIngredient.name.substring(0, '_');
+        var itemName = newIngredient.name.split('_')
+        if (itemName.length === 2)
+        {
+           
+            newIngredient.name = itemName[0] + '_' + ingredientCount;
+        }
+    }
+    
+    document.getElementById('inputGroupContainer').appendChild(newIngredientClone);
+    document.getElementById('ingredientCount').value = ingredientCount + 1;
+});
+document.getElementById('removeIngredient').addEventListener('click', function() {
+    var ingredientCount = parseInt(document.getElementById('ingredientCount').value);
+
+    // one field must be present
+    if (ingredientCount > 1)
+    {
+        var extraIngredient = document.getElementById('inputGroupContainer');
+        extraIngredient.removeChild(extraIngredient.lastElementChild);
+
+        document.getElementById('ingredientCount').value = ingredientCount - 1;
+    }
+});
+</script>
+
+<%- include ('../partials/footer') %>
