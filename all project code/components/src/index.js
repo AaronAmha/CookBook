@@ -126,15 +126,28 @@ app.get('/login', (req, res) => {
   res.render("pages/login");
   });
 // Login
+app.get('/login', (req, res) => {
+  //do something
+  res.render("pages/login");
+  });
+// Login
 app.post('/login', async (req, res) => {
   // const user = await db.query('SELECT password FROM users WHERE username = $1', [req.body.username]);   
 // }
 // Use bcrypt.compare to encrypt the password entered from the
 // user and compare if the entered password is the same as the 
 // registered one. This function returns a boolean value.
+
   try
   {
-      const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [req.body.username]);   
+      const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [req.body.username]);
+      
+      if (!user)
+      {
+        res.redirect('/register');
+        return;
+      }
+
       const match = await bcrypt.compare(req.body.password, user.password);
       if (!match)
       {
@@ -156,40 +169,6 @@ app.post('/login', async (req, res) => {
       res.redirect('/register');
   }
 });
-// check if password from request matches with password in DB
-// const username = req.body.username;
-// const query = "select * from users where users.username = $1";
-// user.password = '';
-// await db.one(query, [
-//   username,
-// ])
-//   // if query execution succeeds
-//   // send success message
-//   .then(function (data) {
-  
-//     user.password = data.password;
-//     user.username = username;
-//   })
-//   // if query execution fails
-//   // send error message
-//   .catch(function (err) {
-//     res.redirect("/register");
-//     return console.log(err);
-//   });
-//   const match = await bcrypt.compare(req.body.password, user.password);
-//   if (!match)
-//   {
-//     res.render("pages/login", {
-//       message: "Incorrect Username or Password",
-//       error: true});
-//   }
-//   else
-//   {
-//     req.session.user = user;
-//     req.session.save();
-//     res.redirect("/discover");
-//   }
-// });
 
 // Authentication Middleware.
 const auth = (req, res, next) => {
@@ -227,16 +206,25 @@ app.get('/discover', async (req, res) => {
       },
     });
     const results = response.data.results;
-    console.log(results);
 
-    res.render('pages/discover', { recipes: results, userQuery });
+     // Use Promise.all to wait for all database insert operations to complete
+    await Promise.all(results.map(async (recipe) => {
+      try {
+        const query = await db.query('INSERT INTO recipes (recipe_id, title) VALUES ($1, $2) RETURNING *', [recipe.id, recipe.title]);
+        console.log(`Recipe "${recipe.title}" with id "${recipe.id}" added to the database.`);
+      } catch (error) {
+        console.error(`Error adding recipe "${recipe.title}" or id "${recipe.id}" to the database:`, error);
+      }
+    }));
+
+    res.render('pages/discover', { recipes: results });
+    
   } catch (error) {
     console.error(error);
     res.render('pages/discover', { recipes: [], error: 'API call failed' });
   }
 });
-
-// Sample route to retrieve and display recipe details
+// Route to retrieve and display recipe details
 app.get('/recipe/:id', async (req, res) => {
   const recipeId = req.params.id;
 
@@ -256,6 +244,23 @@ app.get('/recipe/:id', async (req, res) => {
   }
 });
 
+// Comment section
+app.post('/recipe/:id/comment', async (req, res) => {
+  const recipeId = req.params.id;
+  const { comment } = req.body;
+
+  try {
+    console.log("added a comment");
+    const reviewQuery = await db.query('INSERT INTO reviews (recipe_id, review_text) VALUES ($1, $2) RETURNING review_id', [recipeId, comment]);
+    const reviewId = reviewQuery[0].review_id;
+    await db.query('INSERT INTO reviews_to_recipes (recipe_id, review_id) VALUES ($1, $2)', [recipeId, reviewId]);
+    res.redirect(`/recipe/${recipeId}`);
+  } catch (error) {
+    console.log("did not add a comment");
+    console.error(error);
+    res.redirect(`/recipe/${recipeId}`);
+  }
+});
 
 // *****************************************************
 // <!-- Section 5 : Start Server-->

@@ -42,7 +42,7 @@
                             <div class="recipe-summary mt-4">
                                 <h2>Summary:</h2>
                                 <p>
-                                    <%= recipeInfo.summary %>
+                                    <%- recipeInfo.summary %>
                                 </p>
                             </div>
 
@@ -51,6 +51,7 @@
                 </div>
                 <div class="col-md-4">
                     <!-- Include the comments section -->
+                    <h1>Comment section</h1>
                     <%- include ('../partials/comments.ejs', { comments: recipeInfo.comments }) %>
                 </div>
             </div>
