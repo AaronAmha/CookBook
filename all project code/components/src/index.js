@@ -133,9 +133,17 @@ app.post('/login', async (req, res) => {
 // Use bcrypt.compare to encrypt the password entered from the
 // user and compare if the entered password is the same as the 
 // registered one. This function returns a boolean value.
+
   try
   {
-      const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [req.body.username]);   
+      const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [req.body.username]);
+      
+      if (!user)
+      {
+        res.redirect('/register');
+        return;
+      }
+
       const match = await bcrypt.compare(req.body.password, user.password);
       if (!match)
       {
@@ -192,6 +200,7 @@ app.post('/login', async (req, res) => {
 //   }
 // });
 
+/*
 // Authentication Middleware.
 const auth = (req, res, next) => {
 if (!req.session.user) {
@@ -202,6 +211,7 @@ next();
 };
 //authentication required
 app.use(auth);
+*/
 
 
 app.get("/logout", (req, res) => {
