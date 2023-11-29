@@ -50,14 +50,15 @@ const chef = {
 };
 
 const recipe = {
+  recipe_id: undefined,
   username: undefined,
-  recipeName: undefined,
+  recipe_name: undefined,
   file_name: undefined,
   file_path: undefined,
   instruction: undefined,
-  ingredients: undefined,
-  quantity: undefined,
-  units: undefined,
+  ingredients:[],
+  quantity: [],
+  units: [],
   uploadTime: undefined
 };
 var testMessage = '';
@@ -143,28 +144,7 @@ app.post('/register', async (req, res) => {
       res.redirect('/register');
    }
  });
-//   //hash the password using bcrypt library
-//   const hash = await bcrypt.hash(req.body.password, 10);
-//   const username = req.body.username;
-//   const query = "INSERT INTO users (username, password) VALUES ($1, $2) returning * ;";
 
-//   // To-DO: Insert username and hashed password into the 'users' table
-//   db.any(query, [
-//     username,
-//     hash
-//   ])
-//     // if query execution succeeds
-//     // send success message
-//     .then(function (data) {
-//       res.redirect("/login");
-//     })
-//     // if query execution fails
-//     // send error message
-//     .catch(function (err) {
-//       res.redirect("/register");
-//       return console.log(err);
-//     });
-// });
 app.get('/login', (req, res) => {
   //do something
   res.render("pages/login");
@@ -212,63 +192,8 @@ next();
 };
 // //authentication required
 app.use(auth);
-//   //do something
-//   res.render("pages/login");
-//   });
-// // Login
-// app.post('/login', async (req, res) => {
-
-// try{
-//     const {username, password} = req.body;
-//     const search = "SELECT * FROM users WHERE username = $1";
-//     const userExists = await db.oneOrNone(search, [username]);  
-
-//     if (!userExists)
-//     {
-//       console.log(error);
-//       res.redirect('/register');
-//       return;
-//     } 
-
-//     const match = await bcrypt.compare(password, userExists.password);
-//     if (!match)
-//     {
-//         // redirect to login page!!
-//         console.log(error);
-//         res.render('../views/pages/login', { message: 'Incorrect username or password.'});  
-//         return;  
-//     }
-    
-//     req.session.user = 
-//     {
-//       id: userExists.id, 
-//       username: userExists.username,
-//       first_name: userExists.first_name,
-//       last_name: userExists.last_name,
-//       email: userExists.email,
-//       dob: userExists.dob
-//     };
-//     // req.session.user = user;
-//     req.session.save();
-//     res.redirect('/discover');
-        
-
-//   } catch(err)
-//   {
-//       // redirect them to the register page!!
-//       console.log(err);
-//       res.redirect('/register');
-//   }
 
 
-
-
-
-
-// app.get('/profile', (req, res) => {
-//   //do something
-//   res.render("pages/profile");
-// });
 app.get('/profile', async(req, res) => {
   //do something
   try
@@ -325,167 +250,91 @@ app.post('/addRecipe', async(req, res) => {
   const myfile_path = uploadPath + image.name;
   const myfile_name = image.name;
   const time = new Date().toISOString();
+ 
 
-  // const post = await query('INSERT INTO recipe (username, recipeName, file_name, file_path, instruction, uploadTime) VALUES ($1, $2, $3, $4, $5, $6)', [req.session.user.username, myrecipeName, myfile_name, myfile_path, myinstruction, time]);
-
-  // if(post)
-  // {
-  //   res.render("pages/addRecipe", { message: "Your Recipe Has Succesfully Uploaded!"
-  //   });
-  // }
   try {
     const groceries = ingredients.map(item => item.ingredient);
     const number = ingredients.map(item => item.quantity);
     const type = ingredients.map(item => item.unit);
 
+
+    const recipe = {
+      username: req.session.user.username,
+      recipe_name: myrecipeName,
+      file_name: myfile_name,
+      file_path: myfile_path,
+      instruction: myinstruction,
+      ingredients: groceries,
+      quantity: number,
+      units: type,
+      uploadTime: time
+    };
     // const recipePost = 'INSERT INTO recipe (username, recipeName, file_name, file_path, instruction, ingredients, quantity, units) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)';
-    const recipePost = await db.query('INSERT INTO recipe (username, recipeName, file_name, file_path, instruction, groceries, number, type, uploadTime) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [req.session.user.username, myrecipeName, myfile_name, myfile_path, myinstruction, groceries, number, type, time]);
-    res.send('Nice');
+    const recipePost = await db.query('INSERT INTO recipes (recipe_name, username, file_name, file_path, instruction, ingredients, quantity, units, uploadTime) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [myrecipeName, req.session.user.username, myfile_name, myfile_path, myinstruction, groceries, number, type, time]);
+    res.redirect('/discover');
     // message: "Your Recipe Has Succesfully Uploaded";
   }catch (error) {
     console.error('nah', error);
   }
 });
 
-app.get('/myRecipes', async(req, res) => {
-  //do something
-  try
-  {
-    const allRecipes = await db.query('SELECT * FROM recipe ORDER BY uploadTime');
-    
-    if (allRecipes.rows.length > 0)
-    {
-      const recipes = allRecipes.rows;
-      res.render("pages/myRecipes", { recipes });  
-    }
-    else {
-      res.render("pages/myRecipes", { recipes: [] });
-    }
-  } catch(error) {
-    console.error(error);
-  }
-});
-
-// app.get('/myrecipe/:name', async(req, res) => {
+// app.get('/myRecipes', async(req, res) => {
 //   //do something
-//   const recipeName = req.params.name;
 //   try
 //   {
+//     const allRecipes = await db.query('SELECT * FROM recipes ORDER BY uploadTime');
     
-//     const recipe = await db.oneOrNone('SELECT * FROM recipe WHERE recipeName = $1', [recipeName]);
-
-    
-
-//     const entireRecipe = viewRecipe.ingredients.map((ingredient, index) => {
-//       return {
-//         ingredient: ingredient,
-//         quantity: viewRecipe.quantity[index], 
-//         unit: viewRecipe.units[index]
-//       };
-//     });
-//     res.render("pages/myrecipe", { recipe, extendedIngredients: entireRecipe });  
+//     if (allRecipes.rows > 0)
+//     {
+//       const recipes = allRecipes.rows;
+//       res.render("pages/myRecipes", { recipes });  
+//     }
+//     else {
+//       res.render("pages/myRecipes", { recipes: [] });
+//     }
+//   } catch(error) {
+//     console.error(error);
+//   }
+// });
+// app.get('/myRecipes', async(req, res) => {
+//   //do something
+//   try
+//   {
+//     const myRecipes = await db.query('SELECT * FROM recipes');
+//     if myRecipes
+//     res.render("pages/myRecipes", { recipe: myRecipes.rows});  
 //   }
 //   catch(error) {
 //     console.error(error);
 //   }
 // });
-// app.post("/profile", asyc(req, res) => {
-//   res.render('/profile', { 
-//     first_name: req.session.chefProfile.first_name,
-//     last_name: req.session.chefProfile.last_name,
-//     email: req.session.chefProfile.email,
-//     dob: req.session.chefProfile.dob,
-//     username: req.session.chefProfile.username,
-//   });
-    // const username = req.params.username;
-    // const sql = 'SELECT * FROM users WHERE username = ?';
-
-    // db.query(sql, [username], (err, foundProfile) => {
-    //   if (err) throw err;
-    //   if (foundProfile.length > 0)
-    //   {
-    //     res.render('/profile', {user: foundProfile[0]})
-    //   }
-    // });
-    // const  = {
-    //   first_name: req.params.first_name,
-    //   last_name: req.params.last_name,
-    //   email: req.params.email,
-    // }
-    // res.render("pages/profile", {
-    //   username: req.params.username,
-    //   first_name: req.session.user.first_name,
-    //   last_name: req.session.user.last_name
-
-    // })
-  //   const sql = 'SELECT * FROM users WHERE username = ?';
-  //   db.one(sql, [req.session.username], (error, found) => {
-  //     if(error) throw err;
-
-  //     if (found.length > 0) {
-  //       res.render('/profile', { user: found[0] });
-      
-  //   }
-  // })
-  // res.render('/pages/profile', {
-  //   username: req.session.user.username,
-  //   first_name: req/session.user.first_name,
-  //   last_name: req.session.user.last_name,
-  //   email: req.session.user.email,
-  //   dob: req.session.user.dob,
-  // });   
-
-/*
-app.post("/login", (req, res) => {
-  const email = req.body.email;
-  const username = req.body.username;
-  const query = "select * from students where students.email = $1";
-  const values = [email];
-/ get the student_id based on the emailid
-  db.one(query, values)
-    .then((data) => {
-      user.student_id = data.student_id;
-      user.username = username;
-      user.first_name = data.first_name;
-      user.last_name = data.last_name;
-      user.email = data.email;
-      user.year = data.year;
-      user.major = data.major;
-      user.degree = data.degree;
-
-      req.session.user = user;
-      req.session.save();
-
-      res.redirect("/");
-    })
-    .catch((err) => {
-      console.log(err);
-      res.redirect("/login");
-    });
-});
-
-// Authentication middleware.
-const auth = (req, res, next) => {
-  if (!req.session.user) {
-    return res.redirect("/login");
-  }
-  next();
-};
-
-app.use(auth);
-
-app.get("/", (req, res) => {
-  res.render("pages/home", {
-    username: req.session.user.username,
-    first_name: req.session.user.first_name,
-    last_name: req.session.user.last_name,
-    email: req.session.user.email,
-    year: req.session.user.year,
-    major: req.session.user.major,
-    degree: req.session.user.degree,
+app.get('/myRecipes', async(req, res) => {
+  try {
+     const food = 'SELECT * FROM recipes';
+     await db.query(food, (err, data) => { 
+        if (err) throw err;
+        res.render('pages/myRecipes', { username: req.session.user.username, grubb: data});
+  })
+    }catch(error) {
+          console.error(error);
+    }
   });
-});
-*/
+
+
+
+  // try {
+  //   const food = await db.query('SELECT * FROM recipes');
+  //   if (food.rows > 0) {
+  //     res.render("pages/myRecipes", { recipes: food.rows });
+  //   } else {
+  //     res.render("pages/myRecipes", { recipes: [] });
+  //   }
+  // } catch(error) {
+  //   console.error(error);
+  //   res.status(500).send('Server Error');
+  // }
+
+
 
 app.get("/logout", (req, res) => {
   req.session.destroy();
@@ -537,6 +386,24 @@ app.get('/recipe/:id', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.render('pages/recipe', { recipes: [], error: 'API call failed' });
+  }
+});
+
+// Comment section
+app.post('/recipe/:id/comment', async (req, res) => {
+  const recipeId = req.params.id;
+  const { comment } = req.body;
+
+  try {
+    console.log("added a comment");
+    const reviewQuery = await db.query('INSERT INTO reviews (recipe_id, review_text) VALUES ($1, $2) RETURNING review_id', [recipeId, comment]);
+    const reviewId = reviewQuery[0].review_id;
+    await db.query('INSERT INTO reviews_to_recipes (recipe_id, review_id) VALUES ($1, $2)', [recipeId, reviewId]);
+    res.redirect(`/recipe/${recipeId}`);
+  } catch (error) {
+    console.log("did not add a comment");
+    console.error(error);
+    res.redirect(`/recipe/${recipeId}`);
   }
 });
 

@@ -47,3 +47,71 @@
         <% }); %>
     </ol>
 <% } %> -->
+<!-- <%- include ('../partials/head') %>
+<%- include ('../partials/menu') %>
+
+<main>
+    <div class="container">
+        <h1>My Recipes:</h1>
+        Search form -->
+        <!-- <form action="/myRecipes" method="GET">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="Search Uploaded Recipes" name="query">
+                    <div class="input-group-append">
+                        <button class="btn btn-secondary" type="submit">Search</button>
+                    </div>
+            </div>
+        </form> -->
+    
+        <!-- Iterate through the recipes and display them as cards -->
+        <!-- <div id = "RecipeCards" class="row">
+            <% if (recipes && recipes.length > 0) { %>
+            <% recipes.forEach((recipe) => { %>
+            <div class="col-md-4">
+                <div class="card">
+                <img src="<%= recipe.file_path %>" class="card-img-top" alt="Recipe Image">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <%= recipe.recipeName %>
+                        </h5>
+                        <form action="/myrecipe/<%= recipe.recipeName %>" method="GET">
+                            <button type="submit" class="btn btn-primary">View Recipe</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <% }); %>
+            <% } else { %>
+                <p>NO.</p>
+            <% } %>
+        </div>
+    </div>
+</main>
+<%- include ('../partials/footer') %>   
+ --> 
+
+<!-- <% function renderInstructions(instructions) { %>
+<ol>
+    <% instructions.forEach((step)=> { %>
+        <li>
+            <%= step.step %>
+        </li>
+    <% }); %>
+</ol>
+<% } %>  -->
+<!-- <%- include ('../partials/head') %>
+<%- include ('../partials/menu') %>
+
+<main>
+    <% if (recipes.length > 0) { %>
+        <% recipes.forEach(function(recipe) { %>
+            <div>
+                <h2> <%= recipe.recipe_name %> </h2>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <p>No recipes found.</p>
+    <% } %>
+</main>
+
+<%- include ('../partials/footer') %> -->
