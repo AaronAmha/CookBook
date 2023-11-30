@@ -3,6 +3,7 @@ DROP TABLE IF EXISTS reviews CASCADE;
 DROP TABLE IF EXISTS recipes CASCADE;
 DROP TABLE IF EXISTS chefs CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS favorites CASCADE;
 
 
 
@@ -31,6 +32,8 @@ CREATE TABLE chefs (
 CREATE TABLE recipes (
     recipe_id INT NOT NULL,
     title VARCHAR(200),
+    favorite INT,
+    image VARCHAR,
     PRIMARY KEY (recipe_id)
 );
 -- reviews table
@@ -41,6 +44,11 @@ CREATE TABLE reviews (
     recipe_id INT REFERENCES recipes(recipe_id) ON DELETE CASCADE
 );
 
+
+CREATE TABLE favorites (
+    favorite_ID SERIAL PRIMARY KEY,
+    recipe_id INT REFERENCES recipes(recipe_id) ON DELETE CASCADE
+);
 
 CREATE TABLE reviews_to_recipes (
     recipe_id INT,

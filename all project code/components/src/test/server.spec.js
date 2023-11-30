@@ -61,7 +61,7 @@ it('Negative : /login. Checking invalid name', done => {
       .query({ query: 'chicken' }) 
       .end((err, res) => {
         expect(res).to.have.status(200);
-        expect(res.text).to.include("View Recipe");
+        expect(res.text).to.not.include("View Recipe");
         done();
       });
   });

@@ -237,6 +237,66 @@ app.get("/logout", (req, res) => {
   });
 });
 
+app.get('/favorite', async (req, res) => {
+    const selectFav = "";
+    var results = [];
+    const getRecipeIDs = await db.query('select recipe_id from favorites');
+    console.log(getRecipeIDs);
+    const queryFav = await db.query('select * from recipes where recipe_id in (select recipe_id from favorites)');
+    console.log(queryFav);
+    res.render('pages/favorite', { recipes: queryFav });
+  });
+
+app.post('/discover/favorite', async (req, res) =>{
+    const recipe_id = req.body.favorite;
+    console.log(recipe_id);
+    const insertFav = "insert into favorites (favorite_id, recipe_id) values ($1, $2);";
+    const updateFavorite = "update recipes set favorite = 1 where recipe_id=$1;";
+    await db.one(insertFav, [recipe_id, recipe_id])
+    .then(function (data){
+      console.log("Inserted fav");
+    })
+    .catch(function (err){
+      console.log("Couldn't insert");
+      console.log(err);
+    });
+
+    await db.one(updateFavorite, [recipe_id])
+    .then(function (data){
+      console.log("Updated fav");
+    })
+    .catch(function (err){
+      console.log("Couldn't update");
+      console.log(err);
+    });
+    res.redirect('/discover');
+});
+
+app.post('/discover/unfavorite', async (req, res) =>{
+  const recipe_id = req.body.favorite;
+  console.log(recipe_id);
+  const deleteFav = "delete from favorites where recipe_id = $1;";
+  const updateFavorite = "update recipes set favorite = 0 where recipe_id=$1;";
+  await db.one(deleteFav, [recipe_id])
+  .then(function (data){
+    console.log("Deleted fav");
+  })
+  .catch(function (err){
+    console.log("Couldn't delete");
+    console.log(err);
+  });
+
+  await db.one(updateFavorite, [recipe_id])
+  .then(function (data){
+    console.log("Updated fav");
+  })
+  .catch(function (err){
+    console.log("Couldn't update");
+    console.log(err);
+  });
+  res.redirect('/discover');
+});
+
 app.get('/discover', async (req, res) => {
   try {
     const userQuery = req.query.query || ''; // Retrieve the query parameter from the URL
@@ -254,20 +314,33 @@ app.get('/discover', async (req, res) => {
       },
     });
     const results = response.data.results;
-
     //console.log(results);
-
+    var favoriteState = 0;
+    var finalResults = {};
+    var recipes = [];
+    finalResults.recipes = recipes;
      // Use Promise.all to wait for all database insert operations to complete
     await Promise.all(results.map(async (recipe) => {
       try {
-        const query = await db.query('INSERT INTO recipes (recipe_id, title) VALUES ($1, $2) RETURNING *', [recipe.id, recipe.title]);
-        console.log(`Recipe "${recipe.title}" with id ${recipe.id} added to the database.`);
+        const queryFav = await db.query('select count(recipe_id) from favorites where recipe_id=$1', [recipe.id]);
+        const getFavState = queryFav[0].count;
+        favoriteState = getFavState;
+
+        var finalRecipe = {
+          "title" : recipe.title,
+          "id" : recipe.id,
+          "image" : recipe.image,
+          "favorite" : getFavState
+        }
+        finalResults.recipes.push(finalRecipe);
+        const query = await db.query('INSERT INTO recipes (recipe_id, title, favorite, image) VALUES ($1, $2, $3, $4) RETURNING *', [recipe.id, recipe.title, getFavState, recipe.image]);
+        //console.log(`Recipe "${recipe.title}" with id ${recipe.id} added to the database.`);
       } catch (error) {
-        console.error(`Error adding recipe "${recipe.title}" or id ${recipe.id} to the database:`, error);
+        //console.error(`Error adding recipe "${recipe.title}" or id ${recipe.id} to the database:`, error);
       }
     }));
-
-    res.render('pages/discover', { recipes: results });
+    console.log(finalResults);
+    res.render('pages/discover', { recipes: finalResults});
     
   } catch (error) {
     console.error(error);
@@ -280,9 +353,41 @@ app.get('/addRecipe', async (req, res) => {
     res.render('pages/addRecipe');
 });
 
-
 const multer = require('multer');
 const path = require('path');
+
+// Configure Multer to handle file uploads
+const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, 'uploads/'); // Ensure this directory exists
+    },
+    filename: function(req, file, cb) {
+        cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+    }
+});
+
+const upload = multer({ storage: storage });
+
+app.post('/addRecipe', upload.single('image'), async (req, res) => {
+  const { name, ingredients, instructions } = req.body;
+  const image = req.file ? req.file.filename : null; // Only store the file name or a reference in the database
+
+  try {
+      const insertQuery = `
+          INSERT INTO recipes (name, ingredients, instructions, image)
+          VALUES ($1, $2, $3, $4)
+          RETURNING id;`;
+
+      // Execute the insert query with the form data
+      const result = await db.one(insertQuery, [name, ingredients, instructions, image]);
+
+      // Redirect to the 'discover' page with the new recipe id
+      res.redirect(`/discover?query=${name}`);
+  } catch (error) {
+      console.error('Error saving recipe:', error);
+      res.render('pages/addRecipe', { message: 'Failed to add recipe. Please try again.' });
+  }
+});
 
 
 // Sample route to retrieve and display recipe details

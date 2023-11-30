@@ -17,7 +17,7 @@
     
     <!-- Iterate through the recipes and display them as cards -->
     <div id="DiscoverCards" class="row">
-    <% for (let recipe of recipes) { %>
+    <% for (let recipe of recipes.recipes) { %>
         <div class="col-md-4">
             <div class="card">
             <img src="<%= recipe.image %>" class="card-img-top" alt="Recipe Image">
@@ -28,6 +28,18 @@
                 <form action="/recipe/<%= recipe.id %>" method="GET">
                     <button type="submit" class="btn btn-primary">View Recipe</button>
                 </form>
+                <% if (recipe.favorite == 0){ %>
+                        <form action="/discover/favorite" method="POST">
+                            <input type="hidden" name="favorite" value="<%= recipe.id %>"/>
+                            <button type="submit" class="btn btn-primary">Favorite</button>
+                        </form>
+                <% } 
+                    else { %>
+                        <form action="/discover/unfavorite" method="POST">
+                            <input type="hidden" name="favorite" value="<%= recipe.id %>"/>
+                            <button type="submit" class="btn btn-primary">Unfavorite</button>
+                        </form>
+                    <% } %>
             </div>
             </div>
             </div>
