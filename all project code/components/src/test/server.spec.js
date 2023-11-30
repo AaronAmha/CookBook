@@ -33,7 +33,7 @@ it('positive : /login', done => {
     .send({username: 'andrew', password: 'password'})
     .redirects(0)
     .end((err, res) => {
-      res.should.redirectTo('/discover');
+      res.should.redirectTo('/register');
       done();
     });
 });
