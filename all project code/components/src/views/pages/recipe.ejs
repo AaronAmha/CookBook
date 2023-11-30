@@ -41,9 +41,9 @@
 
                             <div class="recipe-summary mt-4">
                                 <h2>Summary:</h2>
-                                <p>
-                                    <%= recipeInfo.summary %>
-                                </p>
+                                <div id="Summary">
+                                    <%- recipeInfo.summary %>
+                                </div>
                             </div>
 
                         </div>
@@ -60,10 +60,11 @@
 
             <% function renderInstructions(instructions) { %>
                 <ol>
-                    <% instructions.forEach((step)=> { %>
+                    <% for (let i = 0; i < recipeInfo.analyzedInstructions.length; i++) { 
+                        for (let j = 0; j < recipeInfo.analyzedInstructions[i].steps.length; j++){%>
                         <li>
-                            <%= step.step %>
+                            <%= recipeInfo.analyzedInstructions[i].steps[j].step %>
                         </li>
-                        <% }); %>
+                        <% }}; %>
                 </ol>
                 <% } %>

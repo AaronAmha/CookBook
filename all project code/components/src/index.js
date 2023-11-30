@@ -238,7 +238,7 @@ app.get('/discover', async (req, res) => {
       },
     });
     const results = response.data.results;
-    console.log(results);
+    //console.log(results);
 
     res.render('pages/discover', { recipes: results, userQuery });
   } catch (error) {
@@ -305,7 +305,16 @@ app.get('/recipe/:id', async (req, res) => {
     });
 
     const recipeInfo = response.data;
-    res.render('pages/recipe', { recipeInfo });
+    //console.log(recipeInfo.analyzedInstructions);
+    for (let i = 0; i < recipeInfo.analyzedInstructions.length; i++)
+    {
+      for (let j = 0; j < recipeInfo.analyzedInstructions[i].steps.length; j++)
+      {
+        console.log(recipeInfo.analyzedInstructions[i].steps[j].step);
+      }
+    }
+    
+    res.render('pages/recipe', { recipeInfo});
   } catch (error) {
     console.error(error);
     res.render('pages/recipe', { recipes: [], error: 'API call failed' });
