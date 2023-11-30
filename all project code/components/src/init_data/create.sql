@@ -10,8 +10,7 @@ CREATE TABLE recipes (
     title VARCHAR(200),
     PRIMARY KEY (recipe_id)
 );
--- Create users and recipes tables first
--- Then, create the reviews table with foreign key constraints
+-- reviews table
 CREATE TABLE reviews (
     review_id SERIAL PRIMARY KEY,
     review_text VARCHAR(100),
@@ -26,3 +25,6 @@ CREATE TABLE reviews_to_recipes (
     FOREIGN KEY (recipe_id) REFERENCES recipes (recipe_id) ON DELETE CASCADE,
     FOREIGN KEY (review_id) REFERENCES reviews (review_id) ON DELETE CASCADE
 );
+
+insert into users (username, password) values 
+("andrew", "$2b$10$CVNZ5EENn7gCVTelNRvIh.3Sl02Js2Zzi6ODrReYBTISQGEL3PXqy") returning * ;

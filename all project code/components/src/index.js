@@ -10,6 +10,7 @@ const session = require('express-session'); // To set the session object. To sto
 const bcrypt = require('bcrypt'); //  To hash passwords
 const axios = require('axios'); // To make HTTP requests from our server. We'll learn more about it in Part B.
 
+
 // *****************************************************
 // <!-- Section 2 : Connect to DB -->
 // *****************************************************
@@ -170,6 +171,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
+/*
 // Authentication Middleware.
 const auth = (req, res, next) => {
 if (!req.session.user) {
@@ -180,6 +182,7 @@ next();
 };
 //authentication required
 app.use(auth);
+*/
 
 
 app.get("/logout", (req, res) => {
@@ -224,7 +227,55 @@ app.get('/discover', async (req, res) => {
     res.render('pages/discover', { recipes: [], error: 'API call failed' });
   }
 });
-// Route to retrieve and display recipe details
+
+
+app.get('/addRecipe', async (req, res) => {
+    res.render('pages/addRecipe');
+});
+
+
+const multer = require('multer');
+const path = require('path');
+
+// Configure Multer to handle file uploads
+const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, 'uploads/'); // Ensure this directory exists
+    },
+    filename: function(req, file, cb) {
+        cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+    }
+});
+
+const upload = multer({ storage: storage });
+
+// POST route for adding a recipe
+app.post('/addRecipe', upload.single('image'), async (req, res) => {
+    const { name, ingredients, instructions } = req.body;
+    const image = req.file ? req.file.filename : null; // Only store the file name or a reference in the database
+
+    try {
+        const insertQuery = `
+            INSERT INTO recipes (name, ingredients, instructions, image)
+            VALUES ($1, $2, $3, $4)
+            RETURNING id;`;
+
+        // Execute the insert query with the form data
+        const result = await db.one(insertQuery, [name, ingredients, instructions, image]);
+
+        // Redirect to the 'discover' page with the new recipe id
+        res.redirect(`/discover?query=${name}`);
+    } catch (error) {
+        console.error('Error saving recipe:', error);
+        res.render('pages/addRecipe', { message: 'Failed to add recipe. Please try again.' });
+    }
+});
+
+
+
+
+// Sample route to retrieve and display recipe details
+
 app.get('/recipe/:id', async (req, res) => {
   const recipeId = req.params.id;
 

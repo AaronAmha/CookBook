@@ -31,8 +31,9 @@ it('positive : /login', done => {
     .request(server)
     .post('/login')
     .send({username: 'andrew', password: 'password'})
+    .redirects(0)
     .end((err, res) => {
-      expect(res).to.have.status(200);
+      res.should.redirectTo('/discover');
       done();
     });
 });
@@ -42,12 +43,12 @@ it('Negative : /login. Checking invalid name', done => {
     .request(server)
     .post('/login')
     .send({username: 'not username', password: 'password'})
+    .redirects(0)
     .end((err, res) => {
-      expect(res).to.have.status(200);
+      res.should.redirectTo('/register');
       done();
     });
 });
-
 
 
  // Discover Page test cases
@@ -60,6 +61,7 @@ it('Negative : /login. Checking invalid name', done => {
       .query({ query: 'chicken' }) 
       .end((err, res) => {
         expect(res).to.have.status(200);
+        expect(res.text).to.include("View Recipe");
         done();
       });
   });
@@ -72,6 +74,7 @@ it('Negative : /login. Checking invalid name', done => {
         .query({ query: 'invalidqueryterm12345' }) 
         .end((err, res) => {
           expect(res).to.have.status(200);
+          expect(res.text).to.not.include("View Recipe");
           done();
         });
     });
