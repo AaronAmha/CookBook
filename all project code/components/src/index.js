@@ -311,7 +311,7 @@ app.post('/addRecipe', async(req, res) => {
 app.get('/myRecipes', async(req, res) => {
   try {
      const food = 'SELECT * FROM recipes';
-     await db.query(food, (err, data) => { 
+     const feel = await db.query(food, (err, data) => { 
         if (err) throw err;
         res.render('pages/myRecipes', { username: req.session.user.username, grubb: data});
   })
