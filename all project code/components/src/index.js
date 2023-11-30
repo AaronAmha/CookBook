@@ -127,6 +127,11 @@ app.get('/login', (req, res) => {
   res.render("pages/login");
   });
 // Login
+app.get('/login', (req, res) => {
+  //do something
+  res.render("pages/login");
+  });
+// Login
 app.post('/login', async (req, res) => {
   // const user = await db.query('SELECT password FROM users WHERE username = $1', [req.body.username]);   
 // }
@@ -165,40 +170,6 @@ app.post('/login', async (req, res) => {
       res.redirect('/register');
   }
 });
-// check if password from request matches with password in DB
-// const username = req.body.username;
-// const query = "select * from users where users.username = $1";
-// user.password = '';
-// await db.one(query, [
-//   username,
-// ])
-//   // if query execution succeeds
-//   // send success message
-//   .then(function (data) {
-  
-//     user.password = data.password;
-//     user.username = username;
-//   })
-//   // if query execution fails
-//   // send error message
-//   .catch(function (err) {
-//     res.redirect("/register");
-//     return console.log(err);
-//   });
-//   const match = await bcrypt.compare(req.body.password, user.password);
-//   if (!match)
-//   {
-//     res.render("pages/login", {
-//       message: "Incorrect Username or Password",
-//       error: true});
-//   }
-//   else
-//   {
-//     req.session.user = user;
-//     req.session.save();
-//     res.redirect("/discover");
-//   }
-// });
 
 /*
 // Authentication Middleware.
@@ -234,18 +205,29 @@ app.get('/discover', async (req, res) => {
       params: {
         apiKey: process.env.API_KEY,
         query: userQuery,
-        number: 10,
+        number: 1,
       },
     });
     const results = response.data.results;
-    console.log(results);
 
-    res.render('pages/discover', { recipes: results, userQuery });
+     // Use Promise.all to wait for all database insert operations to complete
+    await Promise.all(results.map(async (recipe) => {
+      try {
+        const query = await db.query('INSERT INTO recipes (recipe_id, title) VALUES ($1, $2) RETURNING *', [recipe.id, recipe.title]);
+        console.log(`Recipe "${recipe.title}" with id ${recipe.id} added to the database.`);
+      } catch (error) {
+        console.error(`Error adding recipe "${recipe.title}" or id ${recipe.id} to the database:`, error);
+      }
+    }));
+
+    res.render('pages/discover', { recipes: results });
+    
   } catch (error) {
     console.error(error);
     res.render('pages/discover', { recipes: [], error: 'API call failed' });
   }
 });
+
 
 app.get('/addRecipe', async (req, res) => {
     res.render('pages/addRecipe');
@@ -293,6 +275,7 @@ app.post('/addRecipe', upload.single('image'), async (req, res) => {
 
 
 // Sample route to retrieve and display recipe details
+
 app.get('/recipe/:id', async (req, res) => {
   const recipeId = req.params.id;
 
@@ -300,18 +283,55 @@ app.get('/recipe/:id', async (req, res) => {
     const response = await axios.get(`https://api.spoonacular.com/recipes/${recipeId}/information`, {
       params: {
         includeNutrition: false, // Adjust as needed
-        apiKey:  process.env.API_KEY,
+        apiKey: process.env.API_KEY,
       },
     });
 
     const recipeInfo = response.data;
-    res.render('pages/recipe', { recipeInfo });
+
+    console.log("selecting from database");
+    //const comments = await db.query(`SELECT review_text AND username FROM reviews WHERE recipe_id = ${recipeId}`);
+    const comments = await db.any(`SELECT * FROM reviews WHERE recipe_id = ${recipeId}`);
+    
+    const data = {
+      "recipeInfo": recipeInfo,
+      "comments": comments
+    }
+    console.log(data);
+    // const commentsQuery = await db.query(
+    //   'SELECT r.username, r.review_text FROM reviews r ' +
+    //   'JOIN reviews_to_recipes rr ON r.review_id = rr.review_id ' +
+    //   'WHERE rr.recipe_id = $1',
+    //   [recipeId]
+    // );
+
+    //const comments = commentsQuery.rows;
+    
+
+    res.render('pages/recipe', { data: data });
   } catch (error) {
     console.error(error);
     res.render('pages/recipe', { recipes: [], error: 'API call failed' });
   }
 });
 
+// Comment section
+app.post('/recipe/:id/comment', async (req, res) => {
+  const recipeId = req.params.id;
+  const review  = req.body.review;
+  const username = req.body.username;
+  
+  try {
+    const reviewQuery = await db.query('INSERT INTO reviews (recipe_id, review_text, username) VALUES ($1, $2, $3) RETURNING review_id', [recipeId, review, username]);
+    const reviewId = reviewQuery[0].review_id;
+    await db.query('INSERT INTO reviews_to_recipes (recipe_id, review_id) VALUES ($1, $2)', [recipeId, reviewId]);
+    res.redirect(`/recipe/${recipeId}`);
+  } catch (error) {
+    console.log("did not add a comment");
+    console.error(error);
+    res.redirect(`/recipe/${recipeId}`);
+  }
+});
 
 // *****************************************************
 // <!-- Section 5 : Start Server-->
