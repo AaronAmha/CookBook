@@ -17,6 +17,10 @@
                         <form action="/recipe/<%= recipe.recipe_id %>" method="GET">
                             <button type="submit" class="btn btn-primary">View Recipe</button>
                         </form>
+                        <form action="/favorite/unfavorite" method="POST">
+                            <input type="hidden" name="favorite" value="<%= recipe.recipe_id %>"/>
+                            <button type="submit" class="btn btn-primary">Unfavorite</button>
+                        </form>
                     </div>
                     </div>
                     </div>

@@ -297,6 +297,31 @@ app.post('/discover/unfavorite', async (req, res) =>{
   res.redirect('/discover');
 });
 
+app.post('/favorite/unfavorite', async (req, res) =>{
+  const recipe_id = req.body.favorite;
+  console.log(recipe_id);
+  const deleteFav = "delete from favorites where recipe_id = $1;";
+  const updateFavorite = "update recipes set favorite = 0 where recipe_id=$1;";
+  await db.one(deleteFav, [recipe_id])
+  .then(function (data){
+    console.log("Deleted fav");
+  })
+  .catch(function (err){
+    console.log("Couldn't delete");
+    console.log(err);
+  });
+
+  await db.one(updateFavorite, [recipe_id])
+  .then(function (data){
+    console.log("Updated fav");
+  })
+  .catch(function (err){
+    console.log("Couldn't update");
+    console.log(err);
+  });
+  res.redirect('/favorite');
+});
+
 app.get('/discover', async (req, res) => {
   try {
     const userQuery = req.query.query || ''; // Retrieve the query parameter from the URL
