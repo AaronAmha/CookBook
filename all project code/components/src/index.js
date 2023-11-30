@@ -80,6 +80,7 @@ app.get("/", (req, res) => {
 });
 
 
+
 app.get('/register', (req, res) => {
 
   res.render('pages/register');
@@ -88,15 +89,19 @@ app.get('/register', (req, res) => {
 // Register
 app.post('/register', async (req, res) => {
    //hash the password using bcrypt library
-   const hash = await bcrypt.hash(req.body.password, 10);
+   const {first_name, last_name, email, dob, username, password} = req.body;
+   const hash = await bcrypt.hash(password, 10);
+   
    // To-DO: Insert username and hashed password into the 'users' table
    try 
    {
-       const query = await db.query('INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *', [req.body.username, hash]);
-       res.redirect('/login');
+      const user = await db.query('INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *', [username, hash]);
+      const chef = await db.query('INSERT INTO chefs (username, password, first_name, last_name, email, dob) VALUES ($1, $2, $3, $4, $5, $6) RETURNING * ', [username, hash, first_name, last_name, email, dob]);
+      res.redirect('/login');
    } catch (error)
    {
-       res.redirect('/register');
+      console.error(error);
+      res.redirect('/register');
    }
  });
 //   //hash the password using bcrypt library
@@ -126,41 +131,30 @@ app.get('/login', (req, res) => {
   //do something
   res.render("pages/login");
   });
-// Login
-app.get('/login', (req, res) => {
-  //do something
-  res.render("pages/login");
-  });
-// Login
-app.post('/login', async (req, res) => {
-  // const user = await db.query('SELECT password FROM users WHERE username = $1', [req.body.username]);   
-// }
-// Use bcrypt.compare to encrypt the password entered from the
-// user and compare if the entered password is the same as the 
-// registered one. This function returns a boolean value.
-
+app.post('/login', async(req, res) => {
   try
   {
-      const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [req.body.username]);
-      
-      if (!user)
-      {
-        res.redirect('/register');
-        return;
-      }
+    const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [req.body.username]);
+    const chef = await db.oneOrNone('SELECT * FROM chefs WHERE username = $1', [req.body.username]);
+    if (!user)
+    {
+      res.redirect('/register');
+      return;
+    }
 
-      const match = await bcrypt.compare(req.body.password, user.password);
-      if (!match)
-      {
-          // redirect to login page!!
-          res.render('../views/pages/login', { message: 'Incorrect username or password.'});    
-      }
-      else
-      {
-          req.session.user = user;
-          req.session.save();
-          res.redirect('/discover');
-      }    
+    const match = await bcrypt.compare(req.body.password, user.password);
+    if (!match)
+    {
+        // redirect to login page!!
+        res.render('../views/pages/login', { message: 'Incorrect username or password.'});    
+    }
+    else
+    {
+        req.session.user = user;
+        req.session.chef = chef;
+        req.session.save();
+        res.redirect('/discover');
+    }    
   // If the password is incorrect, throw an error stating
   // "Incorrect username or password."  
   }catch(err)
@@ -170,8 +164,6 @@ app.post('/login', async (req, res) => {
       res.redirect('/register');
   }
 });
-
-/*
 // Authentication Middleware.
 const auth = (req, res, next) => {
 if (!req.session.user) {
@@ -180,9 +172,62 @@ if (!req.session.user) {
 }
 next();
 };
-//authentication required
+// //authentication required
 app.use(auth);
-*/
+
+
+app.get('/profile', async(req, res) => {
+  //do something
+  try
+  {
+    const myProfile = await db.oneOrNone('SELECT * FROM chefs WHERE username = $1', [req.session.user.username]);
+    res.render("pages/profile", { chef: myProfile});  
+  }
+  catch(error) {
+    console.error(error);
+  }
+});
+// console.log(req.files);
+//   const image = req.files.image;
+//   if (!image) 
+//   {
+//     return res.sendStatus(400);
+//   }
+  
+//   // Only images
+//   // if (!/^image/.test(image.mimetype)) return res.sendStatus(400);
+
+//   // // Move image to uploads folder
+//   const uploadPath = __dirname + '/uploads/';
+//   if (!fs.existsSync(uploadPath)){
+//     fs.mkdirSync(uploadPath);
+//   }
+//   image.mv(uploadPath + image.name);
+
+app.post('/uploadProfilePicture', async(req, res) => {
+  try { 
+    console.log(req.files);
+    const image = req.files.image;
+    if (!image) 
+    {
+      return res.sendStatus(400);
+    }
+    const uploadPath = __dirname + '/resources/profilePic/';
+    if (!fs.existsSync(uploadPath)){
+      fs.mkdirSync(uploadPath);
+    }
+      image.mv(uploadPath + image.name);
+
+      // const imgPath = uploadPath + image.name;
+      const pic = await db.query('UPDATE chefs SET profilePic = $1 WHERE username = $2', [uploadPath, req.session.user.username]);
+      // req.session.chefs.profilePic = pic;
+      // req.session.save();
+      res.redirect('/profile');
+
+  } catch (error) {
+    console.error(error);
+  }
+});
 
 
 app.get("/logout", (req, res) => {
@@ -239,42 +284,6 @@ app.get('/addRecipe', async (req, res) => {
 const multer = require('multer');
 const path = require('path');
 
-// Configure Multer to handle file uploads
-const storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        cb(null, 'uploads/'); // Ensure this directory exists
-    },
-    filename: function(req, file, cb) {
-        cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
-    }
-});
-
-const upload = multer({ storage: storage });
-
-// POST route for adding a recipe
-app.post('/addRecipe', upload.single('image'), async (req, res) => {
-    const { name, ingredients, instructions } = req.body;
-    const image = req.file ? req.file.filename : null; // Only store the file name or a reference in the database
-
-    try {
-        const insertQuery = `
-            INSERT INTO recipes (name, ingredients, instructions, image)
-            VALUES ($1, $2, $3, $4)
-            RETURNING id;`;
-
-        // Execute the insert query with the form data
-        const result = await db.one(insertQuery, [name, ingredients, instructions, image]);
-
-        // Redirect to the 'discover' page with the new recipe id
-        res.redirect(`/discover?query=${name}`);
-    } catch (error) {
-        console.error('Error saving recipe:', error);
-        res.render('pages/addRecipe', { message: 'Failed to add recipe. Please try again.' });
-    }
-});
-
-
-
 
 // Sample route to retrieve and display recipe details
 
@@ -285,6 +294,7 @@ app.get('/recipe/:id', async (req, res) => {
     const response = await axios.get(`https://api.spoonacular.com/recipes/${recipeId}/information`, {
       params: {
         includeNutrition: false, // Adjust as needed
+        apiKey: process.env.API_KEY,
         apiKey: process.env.API_KEY,
       },
     });

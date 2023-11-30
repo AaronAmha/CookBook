@@ -1,0 +1,29 @@
+
+<%- include ('../partials/head') %>
+<%- include ('../partials/menu') %>
+
+<main>
+    <div class="container my-4">
+        <h3 class="mb-4">Favorites</h3>
+        <div id="DiscoverCards" class="row">
+            <% for (let recipe of recipes) { %>
+                <div class="col-md-4">
+                    <div class="card">
+                    <img src="<%= recipe.image %>" class="card-img-top" alt="Recipe Image">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <%= recipe.title %>
+                        </h5>
+                        <form action="/recipe/<%= recipe.id %>" method="GET">
+                            <button type="submit" class="btn btn-primary">View Recipe</button>
+                        </form>
+                    </div>
+                    </div>
+                    </div>
+                <% } %>
+        </div>
+    </div>
+</main>
+
+<%- include ('../partials/footer') %>
+

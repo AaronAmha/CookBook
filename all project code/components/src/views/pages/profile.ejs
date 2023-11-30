@@ -1,37 +1,84 @@
-%- include ('../partials/header') %> 
+<%- include ('../partials/head') %> 
 <%- include ('../partials/menu') %>
 
-<main>
-    <div class="container">
-        <!-- THE REST OF YOUR HTML CODE GOES HERE -->
-    <h1><centre>Welcome <%= first_name %></centre></h1>
-
-    <table class = "table">
-        <thead>
-            <tr>
-                <th>FIRST NAME</th>
-                <th><%= first_name %></th>
-            </tr>
-            <tr>
-                <th>LAST NAME </th>
-                <th><%=last_name%></th>
-            </tr>
-            <tr>
-                <th>EMAIL NAME</th>
-                <th><%= email %></th>
-            
-            </tr>
-            <tr>
-                <th>DATE OF BIRTH:</th>
-                <th><%=dob%></th>
-            </tr>
-            <tr>
-                <th>USERNAME</th>
-                <th><%= username %></th>
-            </tr>
-        </thead>
-    </table>
-    </div> 
-    </main>
+<main style = "height: 100vh; overflow: hidden;">
+    <div class="container" style="height: 100%; max-width: 50%; overflow: hidden;">
+        <!-- <div class = "col align-items-center">
+            <div class = ""> -->
+        <div class="row align-items-center">
+            <div class="col-3 p-2">
+                <!-- <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" class="img-thumbnail" alt="Blank Pic"> -->
+                <img src="<%= chef.profilePic ? chef.profilePic :'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png' %>" class="img-thumbnail" alt="Profile Pic">
+                <form action="/uploadProfilePicture" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="image" accept="image/*">
+                    <button type="submit">Upload</button>
+                </form>
+                
+            </div>
+            <div class="col">
+                <!-- THE REST OF YOUR HTML CODE GOES HERE -->
+                <div>
+                    <h1 class = "text-center">Welcome Chef <%=chef.first_name%>,</h1>
+                    <table class = "table fw-light">
+                        <thead>
+                            <tr>
+                                <th>FIRST NAME:</th>
+                                <td><%=chef.first_name%></td>
+                            </tr>
+                            <tr>
+                                <th>LAST NAME: </th>
+                                <td><%=chef.last_name%></td>
+                            </tr>
+                            <tr>
+                                <th>EMAIL:</th>
+                                <td><%=chef.email%></td>
+                            
+                            </tr>
+                            <tr>
+                                <th>DATE OF BIRTH:</th>
+                                <td><%=new Date (chef.dob).toLocaleDateString()%></td>
+                            </tr>
+                            <tr>
+                                <th>USERNAME:</th>
+                                <td><%=chef.username%></td>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>   
+        <div class = "row">
+            <div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="https://i.etsystatic.com/18533867/r/il/2df0b2/1750670597/il_fullxfull.1750670597_aopq.jpg" class="w-100" alt="...">
+                </div>
+                <div class="carousel-item">
+                    <img src="https://i.etsystatic.com/16345182/r/il/70b3ca/2108362488/il_570xN.2108362488_sswz.jpg" class="w-100" alt="...">
+                </div>
+                <div class="carousel-item">
+                    <img src="https://cdn11.bigcommerce.com/s-ek50668lzs/product_images/uploaded_images/breakfast.jpg" class="w-100" alt="...">
+                </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        </div>   
+    </div>
+    <!-- <div class = "row align-items-end">
+        
+        </div> 
+    </div>
+</div> -->
+<!-- </div> -->
+    </div>
+    </div>
+</main>
 
 <%- include ('../partials/footer') %>
