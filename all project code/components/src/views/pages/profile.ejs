@@ -7,7 +7,13 @@
             <div class = ""> -->
         <div class="row align-items-center">
             <div class="col-3 p-2">
-                <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" class="img-thumbnail" alt="Blank Pic">
+                <!-- <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" class="img-thumbnail" alt="Blank Pic"> -->
+                <img src="<%= chef.profilePic ? chef.profilePic :'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png' %>" class="img-thumbnail" alt="Profile Pic">
+                <form action="/uploadProfilePicture" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="image" accept="image/*">
+                    <button type="submit">Upload</button>
+                </form>
+                
             </div>
             <div class="col">
                 <!-- THE REST OF YOUR HTML CODE GOES HERE -->

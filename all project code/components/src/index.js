@@ -164,7 +164,47 @@ app.get('/profile', async(req, res) => {
     console.error(error);
   }
 });
+// console.log(req.files);
+//   const image = req.files.image;
+//   if (!image) 
+//   {
+//     return res.sendStatus(400);
+//   }
+  
+//   // Only images
+//   // if (!/^image/.test(image.mimetype)) return res.sendStatus(400);
 
+//   // // Move image to uploads folder
+//   const uploadPath = __dirname + '/uploads/';
+//   if (!fs.existsSync(uploadPath)){
+//     fs.mkdirSync(uploadPath);
+//   }
+//   image.mv(uploadPath + image.name);
+
+app.post('/uploadProfilePicture', async(req, res) => {
+  try { 
+    console.log(req.files);
+    const image = req.files.image;
+    if (!image) 
+    {
+      return res.sendStatus(400);
+    }
+    const uploadPath = __dirname + '/resources/profilePic/';
+    if (!fs.existsSync(uploadPath)){
+      fs.mkdirSync(uploadPath);
+    }
+      image.mv(uploadPath + image.name);
+
+      // const imgPath = uploadPath + image.name;
+      const pic = await db.query('UPDATE chefs SET profilePic = $1 WHERE username = $2', [uploadPath, req.session.user.username]);
+      // req.session.chefs.profilePic = pic;
+      // req.session.save();
+      res.redirect('/profile');
+
+  } catch (error) {
+    console.error(error);
+  }
+});
 
 
 app.get("/logout", (req, res) => {
@@ -187,20 +227,77 @@ app.get('/discover', async (req, res) => {
       params: {
         apiKey: process.env.API_KEY,
         query: userQuery,
-        number: 10,
+        number: 1,
       },
     });
     const results = response.data.results;
-    console.log(results);
 
-    res.render('pages/discover', { recipes: results, userQuery });
+     // Use Promise.all to wait for all database insert operations to complete
+    await Promise.all(results.map(async (recipe) => {
+      try {
+        const query = await db.query('INSERT INTO recipes (recipe_id, title) VALUES ($1, $2) RETURNING *', [recipe.id, recipe.title]);
+        console.log(`Recipe "${recipe.title}" with id ${recipe.id} added to the database.`);
+      } catch (error) {
+        console.error(`Error adding recipe "${recipe.title}" or id ${recipe.id} to the database:`, error);
+      }
+    }));
+
+    res.render('pages/discover', { recipes: results });
+    
   } catch (error) {
     console.error(error);
     res.render('pages/discover', { recipes: [], error: 'API call failed' });
   }
 });
 
+
+app.get('/addRecipe', async (req, res) => {
+    res.render('pages/addRecipe');
+});
+
+
+const multer = require('multer');
+const path = require('path');
+
+// Configure Multer to handle file uploads
+const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, 'uploads/'); // Ensure this directory exists
+    },
+    filename: function(req, file, cb) {
+        cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+    }
+});
+
+const upload = multer({ storage: storage });
+
+// POST route for adding a recipe
+app.post('/addRecipe', upload.single('image'), async (req, res) => {
+    const { name, ingredients, instructions } = req.body;
+    const image = req.file ? req.file.filename : null; // Only store the file name or a reference in the database
+
+    try {
+        const insertQuery = `
+            INSERT INTO recipes (name, ingredients, instructions, image)
+            VALUES ($1, $2, $3, $4)
+            RETURNING id;`;
+
+        // Execute the insert query with the form data
+        const result = await db.one(insertQuery, [name, ingredients, instructions, image]);
+
+        // Redirect to the 'discover' page with the new recipe id
+        res.redirect(`/discover?query=${name}`);
+    } catch (error) {
+        console.error('Error saving recipe:', error);
+        res.render('pages/addRecipe', { message: 'Failed to add recipe. Please try again.' });
+    }
+});
+
+
+
+
 // Sample route to retrieve and display recipe details
+
 app.get('/recipe/:id', async (req, res) => {
   const recipeId = req.params.id;
 
@@ -208,18 +305,55 @@ app.get('/recipe/:id', async (req, res) => {
     const response = await axios.get(`https://api.spoonacular.com/recipes/${recipeId}/information`, {
       params: {
         includeNutrition: false, // Adjust as needed
-        apiKey:  process.env.API_KEY,
+        apiKey: process.env.API_KEY,
       },
     });
 
     const recipeInfo = response.data;
-    res.render('pages/recipe', { recipeInfo });
+
+    console.log("selecting from database");
+    //const comments = await db.query(`SELECT review_text AND username FROM reviews WHERE recipe_id = ${recipeId}`);
+    const comments = await db.any(`SELECT * FROM reviews WHERE recipe_id = ${recipeId}`);
+    
+    const data = {
+      "recipeInfo": recipeInfo,
+      "comments": comments
+    }
+    console.log(data);
+    // const commentsQuery = await db.query(
+    //   'SELECT r.username, r.review_text FROM reviews r ' +
+    //   'JOIN reviews_to_recipes rr ON r.review_id = rr.review_id ' +
+    //   'WHERE rr.recipe_id = $1',
+    //   [recipeId]
+    // );
+
+    //const comments = commentsQuery.rows;
+    
+
+    res.render('pages/recipe', { data: data });
   } catch (error) {
     console.error(error);
     res.render('pages/recipe', { recipes: [], error: 'API call failed' });
   }
 });
 
+// Comment section
+app.post('/recipe/:id/comment', async (req, res) => {
+  const recipeId = req.params.id;
+  const review  = req.body.review;
+  const username = req.body.username;
+  
+  try {
+    const reviewQuery = await db.query('INSERT INTO reviews (recipe_id, review_text, username) VALUES ($1, $2, $3) RETURNING review_id', [recipeId, review, username]);
+    const reviewId = reviewQuery[0].review_id;
+    await db.query('INSERT INTO reviews_to_recipes (recipe_id, review_id) VALUES ($1, $2)', [recipeId, reviewId]);
+    res.redirect(`/recipe/${recipeId}`);
+  } catch (error) {
+    console.log("did not add a comment");
+    console.error(error);
+    res.redirect(`/recipe/${recipeId}`);
+  }
+});
 
 // *****************************************************
 // <!-- Section 5 : Start Server-->

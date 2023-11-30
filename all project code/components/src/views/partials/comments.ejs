@@ -1,18 +1,35 @@
 <!-- comments.ejs -->
 <div class="card">
     <div class="card-body">
-        <h5 class="card-title">Add a comment!</h5>
+        <h5 class="card-title">Add a review!</h5>
         <!-- Add a form for users to submit new comments -->
-        <form action="/recipe/:id/comment" method="POST">
+        <form action="/recipe/<%= data.recipeInfo.id %>/comment" method="POST">
             <div class="form-group">
                 <label for="username">Username:</label>
                 <input type="text" class="form-control" id="username" name="username" required>
             </div>
             <div class="form-group">
-                <label for="comment">Comment:</label>
-                <textarea class="form-control" id="comment" name="comment" rows="3" required></textarea>
+                <label for="comment">Reviews:</label>
+                <textarea class="form-control" id="review" name="review" rows="3" required></textarea>
             </div>
-            <button type="submit" class="btn btn-primary">Submit Comment</button>
+            <button type="submit" class="btn btn-primary">Submit</button>
         </form>
+        <h5 class="card-title">Comments</h5>
+        <% if (data.comments && data.comments.length> 0) { %>
+            <!-- Add this in your EJS template -->
+            <ul>
+                <% data.comments.forEach(comment=> { %>
+                    <li>
+                        <strong>
+                            <%= comment.username %>:
+                        </strong>
+                        <%= comment.review_text %>
+                    </li>
+                    <% }); %>
+            </ul>
+            <% } else { %>
+                <p>No comments yet.</p>
+                <!-- Add this in your EJS template -->
+                <% } %>
     </div>
-</div>
+    </div>

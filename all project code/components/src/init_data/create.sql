@@ -14,15 +14,16 @@ insert into users (username, password) values
                   ('andrew', '$2b$10$CVNZ5EENn7gCVTelNRvIh.3Sl02Js2Zzi6ODrReYBTISQGEL3PXqy') RETURNING *;
 
 CREATE TABLE chefs (
-    chefID SERIAL PRIMARY KEY
-    username VARCHAR(50) PRIMARY KEY,
+    chefID SERIAL PRIMARY KEY,
+    username VARCHAR(50),
     password CHAR(60) NOT NULL,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     email VARCHAR(100) NOT NULL,
     dob DATE NOT NULL,
-    profilePic VARCHAR(100),
+    profilePic VARCHAR(255),
     FOREIGN KEY (username) REFERENCES users(username)
+    
 );
 
 
