@@ -89,7 +89,7 @@ app.get('/register', (req, res) => {
 app.post('/register', async (req, res) => {
    //hash the password using bcrypt library
    const {first_name, last_name, email, dob, username, password} = req.body;
-   const hash = await bcrypt.hash(password, 10);
+   const hash = await bcrypt.hash(req.body.password, 10);
    
    // To-DO: Insert username and hashed password into the 'users' table
    try 
@@ -113,11 +113,11 @@ app.post('/login', async(req, res) => {
   {
     const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [req.body.username]);
     const chef = await db.oneOrNone('SELECT * FROM chefs WHERE username = $1', [req.body.username]);
-    if (!user)
-    {
-      res.redirect('/register');
-      return;
-    }
+    // if (!user)
+    // {
+    //   res.redirect('/register');
+    //   return;
+    // }
 
     const match = await bcrypt.compare(req.body.password, user.password);
     if (!match)
@@ -227,7 +227,7 @@ app.get('/discover', async (req, res) => {
       params: {
         apiKey: process.env.API_KEY,
         query: userQuery,
-        number: 1,
+        number: 10,
       },
     });
     const results = response.data.results;
@@ -241,6 +241,8 @@ app.get('/discover', async (req, res) => {
         console.error(`Error adding recipe "${recipe.title}" or id ${recipe.id} to the database:`, error);
       }
     }));
+
+    
 
     res.render('pages/discover', { recipes: results });
     
@@ -296,8 +298,7 @@ app.post('/addRecipe', upload.single('image'), async (req, res) => {
 
 
 
-// Sample route to retrieve and display recipe details
-
+// route to retrieve and display recipe details
 app.get('/recipe/:id', async (req, res) => {
   const recipeId = req.params.id;
 
@@ -309,9 +310,28 @@ app.get('/recipe/:id', async (req, res) => {
       },
     });
 
+    //Adding some reviews to the recipes
+      const reviews = [
+        // Reviews data for the corresponding recipeId
+        { review_text: 'Delicious dish! Loved the flavors.', username: 'alice', recipe_id: recipeId },
+        { review_text: 'The chicken alfredo was creamy and tasty.', username: 'bob', recipe_id: recipeId },
+        { review_text: 'The chicken alfredo was creamy and tasty.', username: 'bob', recipe_id: recipeId },
+        { review_text: 'Fantastic recipe! Easy to follow.', username: 'charlie', recipe_id: recipeId },
+        { review_text: 'I added extra spices, and it turned out amazing!', username: 'diana', recipe_id: recipeId },
+        { review_text: 'Not a fan of this one. Too bland for my taste.', username: 'eve', recipe_id: recipeId }
+      ];
+      
+      const existingReviews = await db.any('SELECT * FROM reviews WHERE recipe_id = $1', [recipeId]);
+
+      if (existingReviews.length === 0) {
+      // Insert reviews into the reviews table
+      for (const review of reviews) {
+        await db.query('INSERT INTO reviews (review_text, username, recipe_id) VALUES ($1, $2, $3)', [review.review_text, review.username, review.recipe_id]);
+      }
+    }
+
     const recipeInfo = response.data;
 
-    console.log("selecting from database");
     //const comments = await db.query(`SELECT review_text AND username FROM reviews WHERE recipe_id = ${recipeId}`);
     const comments = await db.any(`SELECT * FROM reviews WHERE recipe_id = ${recipeId}`);
     
@@ -320,12 +340,6 @@ app.get('/recipe/:id', async (req, res) => {
       "comments": comments
     }
     console.log(data);
-    // const commentsQuery = await db.query(
-    //   'SELECT r.username, r.review_text FROM reviews r ' +
-    //   'JOIN reviews_to_recipes rr ON r.review_id = rr.review_id ' +
-    //   'WHERE rr.recipe_id = $1',
-    //   [recipeId]
-    // );
 
     //const comments = commentsQuery.rows;
     

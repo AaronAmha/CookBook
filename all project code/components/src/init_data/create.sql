@@ -10,8 +10,8 @@ CREATE TABLE users (
     username VARCHAR(50) PRIMARY KEY,
     password VARCHAR(200) NOT NULL
 );
-insert into users (username, password) values 
-                  ('andrew', '$2b$10$CVNZ5EENn7gCVTelNRvIh.3Sl02Js2Zzi6ODrReYBTISQGEL3PXqy') RETURNING *;
+-- insert into users (username, password) values 
+--                   ('andrew', '$2b$10$CVNZ5EENn7gCVTelNRvIh.3Sl02Js2Zzi6ODrReYBTISQGEL3PXqy') RETURNING *;
 
 CREATE TABLE chefs (
     chefID SERIAL PRIMARY KEY,
@@ -47,3 +47,14 @@ CREATE TABLE reviews_to_recipes (
     FOREIGN KEY (recipe_id) REFERENCES recipes (recipe_id) ON DELETE CASCADE,
     FOREIGN KEY (review_id) REFERENCES reviews (review_id) ON DELETE CASCADE
 );
+
+INSERT INTO users (username, password) VALUES
+    ('andrew', '$2b$10$CVNZ5EENn7gCVTelNRvIh.3Sl02Js2Zzi6ODrReYBTISQGEL3PXqy'),
+    ('alice', '$2b$10$SomeRandomHashAlice'),
+    ('bob', '$2b$10$SomeRandomHashBob'),
+    ('charlie', '$2b$10$SomeRandomHashCharlie'),
+    ('diana', '$2b$10$SomeRandomHashDiana'),
+    ('eve', '$2b$10$SeRandomHashDiana');
+
+-- INSERT INTO chefs (username, password, first_name, last_name, email, dob, profilePic) VALUES
+
