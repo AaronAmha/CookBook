@@ -210,6 +210,8 @@ app.get('/discover', async (req, res) => {
     });
     const results = response.data.results;
 
+    //console.log(results);
+
      // Use Promise.all to wait for all database insert operations to complete
     await Promise.all(results.map(async (recipe) => {
       try {
