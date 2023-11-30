@@ -202,7 +202,7 @@ app.get('/discover', async (req, res) => {
       params: {
         apiKey: process.env.API_KEY,
         query: userQuery,
-        number: 10,
+        number: 1,
       },
     });
     const results = response.data.results;
@@ -211,9 +211,9 @@ app.get('/discover', async (req, res) => {
     await Promise.all(results.map(async (recipe) => {
       try {
         const query = await db.query('INSERT INTO recipes (recipe_id, title) VALUES ($1, $2) RETURNING *', [recipe.id, recipe.title]);
-        console.log(`Recipe "${recipe.title}" with id "${recipe.id}" added to the database.`);
+        console.log(`Recipe "${recipe.title}" with id ${recipe.id} added to the database.`);
       } catch (error) {
-        console.error(`Error adding recipe "${recipe.title}" or id "${recipe.id}" to the database:`, error);
+        console.error(`Error adding recipe "${recipe.title}" or id ${recipe.id} to the database:`, error);
       }
     }));
 
@@ -232,12 +232,32 @@ app.get('/recipe/:id', async (req, res) => {
     const response = await axios.get(`https://api.spoonacular.com/recipes/${recipeId}/information`, {
       params: {
         includeNutrition: false, // Adjust as needed
-        apiKey:  process.env.API_KEY,
+        apiKey: process.env.API_KEY,
       },
     });
 
     const recipeInfo = response.data;
-    res.render('pages/recipe', { recipeInfo });
+
+    console.log("selecting from database");
+    //const comments = await db.query(`SELECT review_text AND username FROM reviews WHERE recipe_id = ${recipeId}`);
+    const comments = await db.any(`SELECT * FROM reviews WHERE recipe_id = ${recipeId}`);
+    
+    const data = {
+      "recipeInfo": recipeInfo,
+      "comments": comments
+    }
+    console.log(data);
+    // const commentsQuery = await db.query(
+    //   'SELECT r.username, r.review_text FROM reviews r ' +
+    //   'JOIN reviews_to_recipes rr ON r.review_id = rr.review_id ' +
+    //   'WHERE rr.recipe_id = $1',
+    //   [recipeId]
+    // );
+
+    //const comments = commentsQuery.rows;
+    
+
+    res.render('pages/recipe', { data: data });
   } catch (error) {
     console.error(error);
     res.render('pages/recipe', { recipes: [], error: 'API call failed' });
@@ -247,11 +267,11 @@ app.get('/recipe/:id', async (req, res) => {
 // Comment section
 app.post('/recipe/:id/comment', async (req, res) => {
   const recipeId = req.params.id;
-  const { comment } = req.body;
-
+  const review  = req.body.review;
+  const username = req.body.username;
+  
   try {
-    console.log("added a comment");
-    const reviewQuery = await db.query('INSERT INTO reviews (recipe_id, review_text) VALUES ($1, $2) RETURNING review_id', [recipeId, comment]);
+    const reviewQuery = await db.query('INSERT INTO reviews (recipe_id, review_text, username) VALUES ($1, $2, $3) RETURNING review_id', [recipeId, review, username]);
     const reviewId = reviewQuery[0].review_id;
     await db.query('INSERT INTO reviews_to_recipes (recipe_id, review_id) VALUES ($1, $2)', [recipeId, reviewId]);
     res.redirect(`/recipe/${recipeId}`);

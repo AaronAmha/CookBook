@@ -6,22 +6,22 @@
             <div class="row">
                 <div class="col-md-8">
                     <div class="card">
-                        <img src="<%= recipeInfo.image %>" alt="<%= recipeInfo.title %>" class="card-img-top">
+                        <img src="<%= data.recipeInfo.image %>" alt="<%= data.recipeInfo.title %>" class="card-img-top">
                         <div class="card-body">
                             <h1 class="card-title">
-                                <%= recipeInfo.title %>
+                                <%=data.recipeInfo.title %>
                             </h1>
                             <div class="recipe-details">
-                                <p class="card-text">Servings: <%= recipeInfo.servings %>
+                                <p class="card-text">Servings: <%= data.recipeInfo.servings %>
                                 </p>
-                                <p class="card-text">Ready in: <%= recipeInfo.readyInMinutes %> minutes</p>
+                                <p class="card-text">Ready in: <%= data.recipeInfo.readyInMinutes %> minutes</p>
                                 <!-- Add more details as needed -->
                             </div>
 
                             <div class="ingredients mt-4">
                                 <h2>Ingredients:</h2>
                                 <div class="list-group">
-                                    <% recipeInfo.extendedIngredients.forEach((ingredient)=> { %>
+                                    <% data.recipeInfo.extendedIngredients.forEach((ingredient)=> { %>
                                         <div class="list-group-item">
                                             <span>
                                                 <%= ingredient.original %>
@@ -35,14 +35,14 @@
                             <div class="instructions mt-4">
                                 <h2>Instructions:</h2>
                                 <!-- You can use analyzedInstructions if available, or instructions if not -->
-                                <%- recipeInfo.analyzedInstructions.length ?
-                                    renderInstructions(recipeInfo.analyzedInstructions) : recipeInfo.instructions %>
+                                <%- data.recipeInfo.analyzedInstructions.length ? renderInstructions(data.recipeInfo.analyzedInstructions) :
+                                    data.recipeInfo.instructions %>
                             </div>
 
                             <div class="recipe-summary mt-4">
                                 <h2>Summary:</h2>
                                 <p>
-                                    <%- recipeInfo.summary %>
+                                    <%- data.recipeInfo.summary %>
                                 </p>
                             </div>
 
@@ -52,7 +52,7 @@
                 <div class="col-md-4">
                     <!-- Include the comments section -->
                     <h1>Comment section</h1>
-                    <%- include ('../partials/comments.ejs', { comments: recipeInfo.comments }) %>
+                    <%- include ('../partials/comments.ejs', { data: data }) %>
                 </div>
             </div>
         </main>
