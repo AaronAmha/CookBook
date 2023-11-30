@@ -61,10 +61,10 @@
 
             <% function renderInstructions(instructions) { %>
                 <ol>
-                    <% for (let i = 0; i < recipeInfo.analyzedInstructions.length; i++) { 
-                        for (let j = 0; j < recipeInfo.analyzedInstructions[i].steps.length; j++){%>
+                    <% for (let i = 0; i < data.recipeInfo.analyzedInstructions.length; i++) { 
+                        for (let j = 0; j < data.recipeInfo.analyzedInstructions[i].steps.length; j++){%>
                         <li>
-                            <%= recipeInfo.analyzedInstructions[i].steps[j].step %>
+                            <%= data.recipeInfo.analyzedInstructions[i].steps[j].step %>
                         </li>
                         <% }}; %>
                 </ol>
