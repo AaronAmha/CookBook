@@ -1,5 +1,5 @@
 DROP TABLE IF EXISTS reviews_to_recipes CASCADE;
-DROP TABLE IF EXISTS reviews CASCADE;
+DROP TABLE IF EXISTS review CASCADE;
 DROP TABLE IF EXISTS recipes CASCADE;
 DROP TABLE IF EXISTS chefs CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
@@ -8,7 +8,8 @@ DROP TABLE IF EXISTS users CASCADE;
 
 CREATE TABLE users (
     username VARCHAR(50) PRIMARY KEY,
-    password VARCHAR(200) NOT NULL
+    password VARCHAR(200) NOT NULL,
+    comments VARCHAR(200)
 );
 -- insert into users (username, password) values 
 --                   ('andrew', '$2b$10$CVNZ5EENn7gCVTelNRvIh.3Sl02Js2Zzi6ODrReYBTISQGEL3PXqy') RETURNING *;
@@ -28,17 +29,19 @@ CREATE TABLE chefs (
 
 
 CREATE TABLE recipes (
-    recipe_id INT NOT NULL,
-    title VARCHAR(200),
-    PRIMARY KEY (recipe_id)
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    ingredients TEXT NOT NULL,
+    instructions TEXT NOT NULL,
+    image_url VARCHAR(255) 
 );
 -- reviews table
-CREATE TABLE reviews (
-    review_id SERIAL PRIMARY KEY,
-    review_text VARCHAR(100),
-    username VARCHAR(50) REFERENCES users(username) ON DELETE CASCADE,
-    recipe_id INT REFERENCES recipes(recipe_id) ON DELETE CASCADE
-);
+CREATE TABLE IF NOT EXISTS review (
+   review_id SERIAL PRIMARY KEY NOT NULL,
+   username VARCHAR(100),
+   review VARCHAR(200),
+   rating DECIMAL NOT NULL
+ );
 
 
 CREATE TABLE reviews_to_recipes (
