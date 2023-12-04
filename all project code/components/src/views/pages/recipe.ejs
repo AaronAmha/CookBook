@@ -45,7 +45,35 @@
                                     <%- data.recipeInfo.summary %>
                                 </p>
                             </div>
+                            
+                            
+                            <% if (data.likeState == 1){ %>
+                                
+                                <form action="/recipe/<%= data.recipeInfo.id %>/like" method="POST">
+                                    <input type="hidden" name="like" value="<%= data.recipeInfo.id %>"/>
+                                    <button type="submit" class="btn btn-primary" disabled>Like</button>
+                                </form>
+                            <% } 
+                            else { %>
+                                <form action="/recipe/<%= data.recipeInfo.id %>/like" method="POST">
+                                    <input type="hidden" name="like" value="<%= data.recipeInfo.id %>"/>
+                                    <button type="submit" class="btn btn-primary">Like</button>
+                                </form>
+                            <% } %>
 
+                            <% if (data.likeState == -1){ %>
+                                
+                                <form action="/recipe/<%= data.recipeInfo.id %>/dislike" method="POST">
+                                    <input type="hidden" name="dislike" value="<%= data.recipeInfo.id %>"/>
+                                    <button type="submit" class="btn btn-primary" disabled>Dislike</button>
+                                </form>
+                            <% } 
+                            else { %>
+                                <form action="/recipe/<%= data.recipeInfo.id %>/dislike" method="POST">
+                                    <input type="hidden" name="dislike" value="<%= data.recipeInfo.id %>"/>
+                                    <button type="submit" class="btn btn-primary">Dislike</button>
+                                </form>
+                            <% } %>
                         </div>
                     </div>
                 </div>

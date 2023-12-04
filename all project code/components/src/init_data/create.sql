@@ -35,6 +35,8 @@ CREATE TABLE recipes (
     title VARCHAR(200),
     favorite INT,
     image VARCHAR,
+    likeState INT,
+    likes INT,
     PRIMARY KEY (recipe_id)
 );
 -- reviews table
