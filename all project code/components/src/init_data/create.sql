@@ -1,8 +1,9 @@
 DROP TABLE IF EXISTS reviews_to_recipes CASCADE;
-DROP TABLE IF EXISTS review CASCADE;
+DROP TABLE IF EXISTS reviews CASCADE;
 DROP TABLE IF EXISTS recipes CASCADE;
 DROP TABLE IF EXISTS chefs CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS favorites CASCADE;
 
 
 
@@ -11,8 +12,9 @@ CREATE TABLE users (
     password VARCHAR(200) NOT NULL,
     comments VARCHAR(200)
 );
--- insert into users (username, password) values 
---                   ('andrew', '$2b$10$CVNZ5EENn7gCVTelNRvIh.3Sl02Js2Zzi6ODrReYBTISQGEL3PXqy') RETURNING *;
+
+--insert into users (username, password) values 
+--('andrew', '$2b$10$CVNZ5EENn7gCVTelNRvIh.3Sl02Js2Zzi6ODrReYBTISQGEL3PXqy');
 
 CREATE TABLE chefs (
     chefID SERIAL PRIMARY KEY,
@@ -29,20 +31,25 @@ CREATE TABLE chefs (
 
 
 CREATE TABLE recipes (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    ingredients TEXT NOT NULL,
-    instructions TEXT NOT NULL,
-    image_url VARCHAR(255) 
+    recipe_id INT NOT NULL,
+    title VARCHAR(200),
+    favorite INT,
+    image VARCHAR,
+    PRIMARY KEY (recipe_id)
 );
 -- reviews table
-CREATE TABLE IF NOT EXISTS review (
-   review_id SERIAL PRIMARY KEY NOT NULL,
-   username VARCHAR(100),
-   review VARCHAR(200),
-   rating DECIMAL NOT NULL
- );
+CREATE TABLE reviews (
+    review_id SERIAL PRIMARY KEY,
+    review_text VARCHAR(100),
+    username VARCHAR(50) REFERENCES users(username) ON DELETE CASCADE,
+    recipe_id INT REFERENCES recipes(recipe_id) ON DELETE CASCADE
+);
 
+
+CREATE TABLE favorites (
+    favorite_ID SERIAL PRIMARY KEY,
+    recipe_id INT REFERENCES recipes(recipe_id) ON DELETE CASCADE
+);
 
 CREATE TABLE reviews_to_recipes (
     recipe_id INT,
@@ -50,7 +57,6 @@ CREATE TABLE reviews_to_recipes (
     FOREIGN KEY (recipe_id) REFERENCES recipes (recipe_id) ON DELETE CASCADE,
     FOREIGN KEY (review_id) REFERENCES reviews (review_id) ON DELETE CASCADE
 );
-
 INSERT INTO users (username, password) VALUES
     ('andrew', '$2b$10$CVNZ5EENn7gCVTelNRvIh.3Sl02Js2Zzi6ODrReYBTISQGEL3PXqy'),
     ('alice', '$2b$10$SomeRandomHashAlice'),
@@ -58,6 +64,3 @@ INSERT INTO users (username, password) VALUES
     ('charlie', '$2b$10$SomeRandomHashCharlie'),
     ('diana', '$2b$10$SomeRandomHashDiana'),
     ('eve', '$2b$10$SeRandomHashDiana');
-
--- INSERT INTO chefs (username, password, first_name, last_name, email, dob, profilePic) VALUES
-

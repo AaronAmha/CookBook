@@ -59,12 +59,13 @@
 
         <%- include ('../partials/footer') %>
 
-            <% function renderInstructions(instructions) { %>
-                <ol>
-                    <% instructions.forEach((step)=> { %>
-                        <li>
-                            <%= step.step %>
-                        </li>
-                        <% }); %>
-                </ol>
-                <% } %>
+        <% function renderInstructions(instructions) { %>
+            <ol>
+                <% for (let i = 0; i < data.recipeInfo.analyzedInstructions.length; i++) { 
+                    for (let j = 0; j < data.recipeInfo.analyzedInstructions[i].steps.length; j++){%>
+                    <li>
+                        <%= data.recipeInfo.analyzedInstructions[i].steps[j].step %>
+                    </li>
+                    <% }}; %>
+            </ol>
+            <% } %>
