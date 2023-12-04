@@ -90,7 +90,7 @@ app.get('/register', (req, res) => {
 app.post('/register', async (req, res) => {
    //hash the password using bcrypt library
    const {first_name, last_name, email, dob, username, password} = req.body;
-   const hash = await bcrypt.hash(password, 10);
+   const hash = await bcrypt.hash(req.body.password, 10);
    
    // To-DO: Insert username and hashed password into the 'users' table
    try 
@@ -104,28 +104,6 @@ app.post('/register', async (req, res) => {
       res.redirect('/register');
    }
  });
-//   //hash the password using bcrypt library
-//   const hash = await bcrypt.hash(req.body.password, 10);
-//   const username = req.body.username;
-//   const query = "INSERT INTO users (username, password) VALUES ($1, $2) returning * ;";
-
-//   // To-DO: Insert username and hashed password into the 'users' table
-//   db.any(query, [
-//     username,
-//     hash
-//   ])
-//     // if query execution succeeds
-//     // send success message
-//     .then(function (data) {
-//       res.redirect("/login");
-//     })
-//     // if query execution fails
-//     // send error message
-//     .catch(function (err) {
-//       res.redirect("/register");
-//       return console.log(err);
-//     });
-// });
 
 app.get('/login', (req, res) => {
   //do something
@@ -425,9 +403,28 @@ app.get('/recipe/:id', async (req, res) => {
       params: {
         includeNutrition: false, // Adjust as needed
         apiKey: process.env.API_KEY,
-        apiKey: process.env.API_KEY,
       },
     });
+
+    //Adding some reviews to the recipes
+      const reviews = [
+        // Reviews data for the corresponding recipeId
+        { review_text: 'Delicious dish! Loved the flavors.', username: 'alice', recipe_id: recipeId },
+        { review_text: 'The chicken alfredo was creamy and tasty.', username: 'bob', recipe_id: recipeId },
+        { review_text: 'The chicken alfredo was creamy and tasty.', username: 'bob', recipe_id: recipeId },
+        { review_text: 'Fantastic recipe! Easy to follow.', username: 'charlie', recipe_id: recipeId },
+        { review_text: 'I added extra spices, and it turned out amazing!', username: 'diana', recipe_id: recipeId },
+        { review_text: 'Not a fan of this one. Too bland for my taste.', username: 'eve', recipe_id: recipeId }
+      ];
+      
+      const existingReviews = await db.any('SELECT * FROM reviews WHERE recipe_id = $1', [recipeId]);
+
+      if (existingReviews.length === 0) {
+      // Insert reviews into the reviews table
+      for (const review of reviews) {
+        await db.query('INSERT INTO reviews (review_text, username, recipe_id) VALUES ($1, $2, $3)', [review.review_text, review.username, review.recipe_id]);
+      }
+    }
 
     const recipeInfo = response.data;
 
