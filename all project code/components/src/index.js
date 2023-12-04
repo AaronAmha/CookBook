@@ -228,47 +228,47 @@ app.get('/discover', async (req, res) => {
   }
 });
 
-
 app.get('/addRecipe', async (req, res) => {
-    res.render('pages/addRecipe');
+  res.render('pages/addRecipe');
 });
 
 
 const multer = require('multer');
 const path = require('path');
 
+
 // Configure Multer to handle file uploads
 const storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        cb(null, 'uploads/'); // Ensure this directory exists
-    },
-    filename: function(req, file, cb) {
-        cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
-    }
+  destination: function(req, file, cb) {
+      cb(null, 'uploads/'); // Ensure this directory exists
+  },
+  filename: function(req, file, cb) {
+      cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+  }
 });
+
 
 const upload = multer({ storage: storage });
 
-// POST route for adding a recipe
+
 app.post('/addRecipe', upload.single('image'), async (req, res) => {
-    const { name, ingredients, instructions } = req.body;
-    const image = req.file ? req.file.filename : null; // Only store the file name or a reference in the database
+  const { name, ingredients, instructions } = req.body;
+  const image = req.file ? req.file.filename : null; // Only store the file name
+  const likeState = 0; // Default like state
+  const likes = 0; // Default number of likes
 
-    try {
-        const insertQuery = `
-            INSERT INTO recipes (name, ingredients, instructions, image)
-            VALUES ($1, $2, $3, $4)
-            RETURNING id;`;
+  try {
+      const insertQuery = `
+          INSERT INTO recipes (title, ingredients, instructions, image, likeState, likes)
+          VALUES ($1, $2, $3, $4, $5, $6)
+          RETURNING recipe_id;`;
 
-        // Execute the insert query with the form data
-        const result = await db.one(insertQuery, [name, ingredients, instructions, image]);
-
-        // Redirect to the 'discover' page with the new recipe id
-        res.redirect(`/discover?query=${name}`);
-    } catch (error) {
-        console.error('Error saving recipe:', error);
-        res.render('pages/addRecipe', { message: 'Failed to add recipe. Please try again.' });
-    }
+      const result = await db.one(insertQuery, [name, ingredients, instructions, image, likeState, likes]);
+      res.redirect(`/discover`);
+  } catch (error) {
+      console.error('Error adding recipe:', error);
+      res.render('pages/addRecipe', { message: 'Failed to add recipe. Please try again.' });
+  }
 });
 
 
