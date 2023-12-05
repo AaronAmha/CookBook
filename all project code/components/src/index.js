@@ -220,7 +220,7 @@ app.get('/favorite', async (req, res) => {
     var results = [];
     const getRecipeIDs = await db.query('select recipe_id from favorites');
     console.log(getRecipeIDs);
-    const queryFav = await db.query('select * from recipes where recipe_id in (select recipe_id from favorites)');
+    const queryFav = await db.query('select * from recipes where recipe_id in (select recipe_id from favorites where username = $1)', [req.session.user.username]);
     console.log(queryFav);
     res.render('pages/favorite', { recipes: queryFav });
   });
@@ -228,23 +228,13 @@ app.get('/favorite', async (req, res) => {
 app.post('/discover/favorite', async (req, res) =>{
     const recipe_id = req.body.favorite;
     console.log(recipe_id);
-    const insertFav = "insert into favorites (favorite_id, recipe_id) values ($1, $2);";
-    const updateFavorite = "update recipes set favorite = 1 where recipe_id=$1;";
-    await db.one(insertFav, [recipe_id, recipe_id])
+    const insertFav = "insert into favorites (username, recipe_id) values ($1, $2);";
+    await db.one(insertFav, [req.session.user.username, recipe_id])
     .then(function (data){
       console.log("Inserted fav");
     })
     .catch(function (err){
       console.log("Couldn't insert");
-      console.log(err);
-    });
-
-    await db.one(updateFavorite, [recipe_id])
-    .then(function (data){
-      console.log("Updated fav");
-    })
-    .catch(function (err){
-      console.log("Couldn't update");
       console.log(err);
     });
     res.redirect('/discover');
@@ -253,23 +243,13 @@ app.post('/discover/favorite', async (req, res) =>{
 app.post('/discover/unfavorite', async (req, res) =>{
   const recipe_id = req.body.favorite;
   console.log(recipe_id);
-  const deleteFav = "delete from favorites where recipe_id = $1;";
-  const updateFavorite = "update recipes set favorite = 0 where recipe_id=$1;";
-  await db.one(deleteFav, [recipe_id])
+  const deleteFav = "delete from favorites where recipe_id = $1 and username = $2;";
+  await db.one(deleteFav, [recipe_id, req.session.user.username])
   .then(function (data){
     console.log("Deleted fav");
   })
   .catch(function (err){
     console.log("Couldn't delete");
-    console.log(err);
-  });
-
-  await db.one(updateFavorite, [recipe_id])
-  .then(function (data){
-    console.log("Updated fav");
-  })
-  .catch(function (err){
-    console.log("Couldn't update");
     console.log(err);
   });
   res.redirect('/discover');
@@ -278,23 +258,13 @@ app.post('/discover/unfavorite', async (req, res) =>{
 app.post('/favorite/unfavorite', async (req, res) =>{
   const recipe_id = req.body.favorite;
   console.log(recipe_id);
-  const deleteFav = "delete from favorites where recipe_id = $1;";
-  const updateFavorite = "update recipes set favorite = 0 where recipe_id=$1;";
-  await db.one(deleteFav, [recipe_id])
+  const deleteFav = "delete from favorites where recipe_id = $1 and username = $2;";
+  await db.one(deleteFav, [recipe_id, req.session.user.username])
   .then(function (data){
     console.log("Deleted fav");
   })
   .catch(function (err){
     console.log("Couldn't delete");
-    console.log(err);
-  });
-
-  await db.one(updateFavorite, [recipe_id])
-  .then(function (data){
-    console.log("Updated fav");
-  })
-  .catch(function (err){
-    console.log("Couldn't update");
     console.log(err);
   });
   res.redirect('/favorite');
@@ -325,11 +295,11 @@ app.get('/discover', async (req, res) => {
      // Use Promise.all to wait for all database insert operations to complete
     await Promise.all(results.map(async (recipe) => {
       try {
-        const queryFav = await db.query('select count(recipe_id) from favorites where recipe_id=$1', [recipe.id]);
+        const queryFav = await db.query('select count(recipe_id) from favorites where recipe_id=$1 and username=$2', [recipe.id, req.session.user.username]);
         var likeState;
         var likes;
         try{
-          const queryGetLike = await db.query('select likeState from recipes where recipe_id=$1', [recipe.id]);
+          const queryGetLike = await db.query('select likeState from likes where recipe_id=$1 and username=$2', [recipe.id, req.session.user.username]);
      
           likeState = queryGetLike[0].likestate;
         }
@@ -360,7 +330,14 @@ app.get('/discover', async (req, res) => {
           "likes" : likes
         }
         finalResults.recipes.push(finalRecipe);
-        const query = await db.query('INSERT INTO recipes (recipe_id, title, favorite, image, likeState, likes) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *', [recipe.id, recipe.title, getFavState, recipe.image, likeState, likes]);
+        try {
+          const query = await db.query('INSERT INTO recipes (recipe_id, title, image, likes) VALUES ($1, $2, $3, $4) RETURNING *', [recipe.id, recipe.title, recipe.image, likes]);
+        }
+        catch (err) {
+
+        }
+        
+        const insertLikeState = await db.query('INSERT INTO likes (username, likeState, recipe_id) VALUES ($1, $2, $3) RETURNING *', [req.session.user.username, likeState, recipe.id]);
         //console.log(`Recipe "${recipe.title}" with id ${recipe.id} added to the database.`);
       } catch (error) {
         //console.error(`Error adding recipe "${recipe.title}" or id ${recipe.id} to the database:`, error);
@@ -455,14 +432,37 @@ app.get('/recipe/:id', async (req, res) => {
     console.log("selecting from database");
     //const comments = await db.query(`SELECT review_text AND username FROM reviews WHERE recipe_id = ${recipeId}`);
     const comments = await db.any(`SELECT * FROM reviews WHERE recipe_id = ${recipeId}`);
-    const likeState = await db.any(`SELECT likeState FROM recipes WHERE recipe_id = ${recipeId}`);
-    console.log(likeState);
-    const data = {
-      "recipeInfo": recipeInfo,
-      "comments": comments,
-      "likeState" : likeState[0].likestate
+    var likeState;
+    try{
+      likeState = await db.any(`SELECT likeState FROM likes WHERE recipe_id = $1 and username = $2`, [recipeId, req.session.user.username]);
+      console.log(likeState);
     }
-    console.log(data);
+    catch (error)
+    {
+      likeState = null;
+    }
+
+    var data;
+    if (likeState == null || likeState[0] == null || likeState[0].likestate == null)
+    {
+      data = {
+        "recipeInfo": recipeInfo,
+        "comments": comments,
+        "likeState" : 0
+      }
+    }
+    else
+    {
+      data = {
+        "recipeInfo": recipeInfo,
+        "comments": comments,
+        "likeState" : likeState[0].likestate
+      }
+    }
+
+    //console.log(likeState);
+   
+    //console.log(data);
     // const commentsQuery = await db.query(
     //   'SELECT r.username, r.review_text FROM reviews r ' +
     //   'JOIN reviews_to_recipes rr ON r.review_id = rr.review_id ' +
@@ -505,7 +505,7 @@ app.post('/recipe/:id/like', async (req, res) => {
   try{
 
     try{
-      const queryGetLikeState = await db.query('select likeState from recipes where recipe_id=$1', [recipeId]);
+      const queryGetLikeState = await db.query('select likeState from likes where recipe_id=$1 and username=$2', [recipeId, req.session.user.username]);
  
       likeState = queryGetLikeState[0].likestate;
     }
@@ -539,7 +539,7 @@ app.post('/recipe/:id/like', async (req, res) => {
     const updateLike = await db.query('UPDATE recipes SET likes = $1 WHERE recipe_id = $2', [likes, recipeId]);
 
 
-    const updateLikeState = await db.query('UPDATE recipes SET likeState = $1 WHERE recipe_id = $2', [1, recipeId]);
+    const updateLikeState = await db.query('UPDATE likes SET likeState = $1 WHERE recipe_id = $2 and username = $3', [1, recipeId, req.session.user.username]);
     
     
     res.redirect(`/recipe/${recipeId}`);
@@ -556,7 +556,7 @@ app.post('/recipe/:id/dislike', async (req, res) => {
   var likeState;
   try{
     try{
-      const queryGetLikeState = await db.query('select likeState from recipes where recipe_id=$1', [recipeId]);
+      const queryGetLikeState = await db.query('select likeState from likes where recipe_id=$1 and username=$2', [recipeId, req.session.user.username]);
  
       likeState = queryGetLikeState[0].likestate;
     }
@@ -590,7 +590,7 @@ app.post('/recipe/:id/dislike', async (req, res) => {
     const updateLike = await db.query('UPDATE recipes SET likes = $1 WHERE recipe_id = $2', [likes, recipeId]);
 
 
-    const updateLikeState = await db.query('UPDATE recipes SET likeState = $1 WHERE recipe_id = $2', [-1, recipeId]);
+    const updateLikeState = await db.query('UPDATE likes SET likeState = $1 WHERE recipe_id = $2 and username=$3', [-1, recipeId, req.session.user.username]);
     res.redirect(`/recipe/${recipeId}`);
   }
   catch (error){
