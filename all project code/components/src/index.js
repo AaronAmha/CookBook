@@ -250,7 +250,7 @@ app.get('/discover', async (req, res) => {
 });
 
 
-async function getApiRecipes(query) {
+/*async function getApiRecipes(query) {
   try {
     const response = await axios({
       url: 'https://api.spoonacular.com/recipes/complexSearch',
@@ -280,7 +280,40 @@ async function getApiRecipes(query) {
     console.error('Error fetching recipes from API:', error);
     return []; // Return an empty array in case of error
   }
+}*/
+
+async function getApiRecipes(query) {
+  try {
+    const response = await axios({
+      url: 'https://api.spoonacular.com/recipes/complexSearch',
+      method: 'GET',
+      params: {
+        apiKey: process.env.API_KEY,
+        query: query,
+        number: 1, // Adjust the number of recipes you want to fetch
+        addRecipeInformation: true, // This will include image URLs in the response
+      },
+    });
+
+    const apiRecipes = response.data.results;
+
+    // Insert or update the recipes in your database
+    await Promise.all(apiRecipes.map(async (recipe) => {
+      try {
+        // Now include the image URL in your insert/update query
+        await db.none('INSERT INTO recipes (recipe_id, title, image) VALUES ($1, $2, $3) ON CONFLICT (recipe_id) DO UPDATE SET title = $2, image = $3', [recipe.id, recipe.title, recipe.image]);
+      } catch (error) {
+        console.error(`Error handling recipe "${recipe.title}":`, error);
+      }
+    }));
+
+    return apiRecipes;
+  } catch (error) {
+    console.error('Error fetching recipes from API:', error);
+    return []; // Return an empty array in case of error
+  }
 }
+
 
 
 
