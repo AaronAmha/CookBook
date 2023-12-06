@@ -5,7 +5,9 @@
     <div class="row">
         <div class="col-md-8">
             <div class="card">
-                <img src="<%= data.recipeInfo.image.startsWith('http') ? data.recipeInfo.image : '/uploads/' + data.recipeInfo.image %>" alt="<%= data.recipeInfo.title %>" class="card-img-top">
+                    <% if (data.recipeInfo.image != null) {%>
+                        <img src="<%= data.recipeInfo.image.startsWith('http') ? data.recipeInfo.image : '/uploads/' + data.recipeInfo.image %>" alt="<%= data.recipeInfo.title %>" class="card-img-top">
+                    <% } %>
                     <h1 class="card-title">
                         <%= data.recipeInfo.title %>
                     </h1>
@@ -61,29 +63,29 @@
                         </div>
                     <% } %>
                     <% if (data.likeState == 1){ %>
-                        <% if (data.recipeInfo.recipe_id != null){ %>
-                            <form action="/recipe/<%= data.recipeInfo.recipe_id %>/like" method="POST">
-                                <input type="hidden" name="like" value="<%= data.recipeInfo.recipe_id %>"/>
+                        <% if (data.recipe_id != null){ %>
+                            <form action="/recipe/<%= data.recipe_id %>/like" method="POST">
+                                <input type="hidden" name="like" value="<%= data.recipe_id %>"/>
                                 <button type="submit" class="btn btn-primary" disabled>Like</button>
                             </form>
                         <% }
                         else { %>
-                            <form action="/recipe/<%= data.recipeInfo.id %>/like" method="POST">
-                                <input type="hidden" name="like" value="<%= data.recipeInfo.id %>"/>
+                            <form action="/recipe/<%= data.recipe_id %>/like" method="POST">
+                                <input type="hidden" name="like" value="<%= data.recipe_id %>"/>
                                 <button type="submit" class="btn btn-primary" disabled>Like</button>
                             </form>
                         <% } %>
                     <% } 
                     else { %>
-                        <% if (data.recipeInfo.recipe_id != null){ %>
-                            <form action="/recipe/<%= data.recipeInfo.recipe_id %>/like" method="POST">
-                                <input type="hidden" name="like" value="<%= data.recipeInfo.recipe_id %>"/>
+                        <% if (data.recipe_id != null){ %>
+                            <form action="/recipe/<%= data.recipe_id %>/like" method="POST">
+                                <input type="hidden" name="like" value="<%= data.recipe_id %>"/>
                                 <button type="submit" class="btn btn-primary">Like</button>
                             </form>
                         <% }
                         else { %>
-                            <form action="/recipe/<%= data.recipeInfo.id %>/like" method="POST">
-                                <input type="hidden" name="like" value="<%= data.recipeInfo.id %>"/>
+                            <form action="/recipe/<%= data.recipe_id %>/like" method="POST">
+                                <input type="hidden" name="like" value="<%= data.recipe_id %>"/>
                                 <button type="submit" class="btn btn-primary">Like</button>
                             </form>
                         <% } %>
@@ -91,29 +93,29 @@
 
                     <% if (data.likeState == -1){ %>
                         
-                        <% if (data.recipeInfo.recipe_id != null){ %>
-                            <form action="/recipe/<%= data.recipeInfo.recipe_id %>/dislike" method="POST">
-                                <input type="hidden" name="like" value="<%= data.recipeInfo.recipe_id %>"/>
+                        <% if (data.recipe_id != null){ %>
+                            <form action="/recipe/<%= data.recipe_id %>/dislike" method="POST">
+                                <input type="hidden" name="like" value="<%= data.recipe_id %>"/>
                                 <button type="submit" class="btn btn-primary" disabled>Dislike</button>
                             </form>
                         <% }
                         else { %>
-                            <form action="/recipe/<%= data.recipeInfo.id %>/dislike" method="POST">
-                                <input type="hidden" name="like" value="<%= data.recipeInfo.id %>"/>
+                            <form action="/recipe/<%= data.recipe_id %>/dislike" method="POST">
+                                <input type="hidden" name="like" value="<%= data.recipe_id %>"/>
                                 <button type="submit" class="btn btn-primary" disabled>Dislike</button>
                             </form>
                         <% } %>
                     <% } 
                     else { %>
-                        <% if (data.recipeInfo.recipe_id != null){ %>
-                            <form action="/recipe/<%= data.recipeInfo.recipe_id %>/dislike" method="POST">
-                                <input type="hidden" name="like" value="<%= data.recipeInfo.recipe_id %>"/>
+                        <% if (data.recipe_id != null){ %>
+                            <form action="/recipe/<%= data.recipe_id %>/dislike" method="POST">
+                                <input type="hidden" name="like" value="<%= data.recipe_id %>"/>
                                 <button type="submit" class="btn btn-primary">Dislike</button>
                             </form>
                         <% }
                         else { %>
-                            <form action="/recipe/<%= data.recipeInfo.id %>/dislike" method="POST">
-                                <input type="hidden" name="like" value="<%= data.recipeInfo.id %>"/>
+                            <form action="/recipe/<%= data.recipe_id %>/dislike" method="POST">
+                                <input type="hidden" name="like" value="<%= data.recipe_id %>"/>
                                 <button type="submit" class="btn btn-primary">Dislike</button>
                             </form>
                         <% } %>
