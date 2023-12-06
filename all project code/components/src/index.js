@@ -414,6 +414,10 @@ app.post('/favorite/unfavorite', async (req, res) =>{
 
 app.get('/discover', async (req, res) => {
   try {
+    if (req.session.query == null)
+    {
+      req.session.query = "";
+    }
     // Fetch recipes from the API
     await getApiRecipes(req.session.query || '', req);
     console.log(req.session.query);
@@ -481,7 +485,7 @@ app.get('/discover', async (req, res) => {
     res.render('pages/discover', { recipes: finalResults.recipes, searchQuery : req.session.query });
   } catch (error) {
     console.error(error);
-    res.render('pages/discover', { recipes: [], error: 'Error fetching recipes' });
+    res.render('pages/discover', { recipes: [], searchQuery : "", error: 'Error fetching recipes' });
   }
 });
 
@@ -792,12 +796,22 @@ app.get('/recipe/:id', async (req, res) => {
       }
     }
     
-    var removedHTMLFromSummary = recipeInfo.summary.replace( /(<([^>]+)>)/ig, '');
+    
+    var removedHTMLFromSummary 
+    
+    if (recipeInfo.summary != null)
+    {
+      removedHTMLFromSummary = recipeInfo.summary.replace( /(<([^>]+)>)/ig, '');
+    }
+    else
+    {
+      removedHTMLFromSummary = "";
+    }
 
     res.render('pages/recipe', { data: data , username: req.session.user.username, editedSummary: removedHTMLFromSummary});
   } catch (error) {
     console.error("Error in /recipe/:id route:", error);
-    res.render('pages/recipe', { data: { recipeInfo: {}, comments: [] }, error: 'Failed to load recipe details.' });
+    res.render('pages/recipe', { data: { recipeInfo: {}, comments: [] }, editedSummary: "", username: req.session.user.username, error: 'Failed to load recipe details.' });
   }
 });
 
