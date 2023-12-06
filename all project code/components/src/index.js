@@ -778,7 +778,8 @@ app.get('/recipe/:id', async (req, res) => {
       data = {
         "recipeInfo": recipeInfo,
         "comments": comments,
-        "likeState" : 0
+        "likeState" : 0,
+        "recipe_id" : recipeId
       }
     }
     else
@@ -786,7 +787,8 @@ app.get('/recipe/:id', async (req, res) => {
       data = {
         "recipeInfo": recipeInfo,
         "comments": comments,
-        "likeState" : likeState[0].likestate
+        "likeState" : likeState[0].likestate,
+        "recipe_id" : recipeId
       }
     }
     
