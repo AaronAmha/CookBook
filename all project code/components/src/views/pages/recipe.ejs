@@ -1,70 +1,75 @@
-<!-- recipe.ejs -->
 <%- include ('../partials/head') %>
-    <%- include ('../partials/menu') %>
+<%- include ('../partials/menu') %>
 
-        <main class="container mt-4">
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="card">
-                        <img src="<%= data.recipeInfo.image %>" alt="<%= data.recipeInfo.title %>" class="card-img-top">
-                        <div class="card-body">
-                            <h1 class="card-title">
-                                <%=data.recipeInfo.title %>
-                            </h1>
-                            <div class="recipe-details">
-                                <p class="card-text">Servings: <%= data.recipeInfo.servings %>
-                                </p>
-                                <p class="card-text">Ready in: <%= data.recipeInfo.readyInMinutes %> minutes</p>
-                                <!-- Add more details as needed -->
-                            </div>
-
-                            <div class="ingredients mt-4">
-                                <h2>Ingredients:</h2>
-                                <div class="list-group">
-                                    <% data.recipeInfo.extendedIngredients.forEach((ingredient)=> { %>
-                                        <div class="list-group-item">
-                                            <span>
-                                                <%= ingredient.original %>
-                                            </span>
-                                        </div>
-                                        <% }); %>
-                                </div>
-                            </div>
-
-
-                            <div class="instructions mt-4">
-                                <h2>Instructions:</h2>
-                                <!-- You can use analyzedInstructions if available, or instructions if not -->
-                                <%- data.recipeInfo.analyzedInstructions.length ? renderInstructions(data.recipeInfo.analyzedInstructions) :
-                                    data.recipeInfo.instructions %>
-                            </div>
-
-                            <div class="recipe-summary mt-4">
-                                <h2>Summary:</h2>
-                                <p>
-                                    <%- data.recipeInfo.summary %>
-                                </p>
-                            </div>
-
-                        </div>
+<main class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <img src="<%= data.recipeInfo.image.startsWith('http') ? data.recipeInfo.image : '/uploads/' + data.recipeInfo.image %>" alt="<%= data.recipeInfo.title %>" class="card-img-top">
+                    <h1 class="card-title">
+                        <%= data.recipeInfo.title %>
+                    </h1>
+                    <div class="recipe-details">
+                        <% if(data.recipeInfo.servings) { %>
+                            <p class="card-text">Servings: <%= data.recipeInfo.servings %>
+                            </p>
+                        <% } %>
+                        <% if(data.recipeInfo.readyInMinutes) { %>
+                            <p class="card-text">Ready in: <%= data.recipeInfo.readyInMinutes %> minutes</p>
+                        <% } %>
+                        <!-- Add more details as needed -->
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <!-- Include the comments section -->
-                    <h1>Comment section</h1>
-                    <%- include ('../partials/comments.ejs', { data: data }) %>
+
+                    <div class="ingredients mt-4">
+                        <h2>Ingredients:</h2>
+                        <% if(data.recipeInfo.extendedIngredients) { %>
+                            <div class="list-group">
+                                <% data.recipeInfo.extendedIngredients.forEach((ingredient)=> { %>
+                                    <div class="list-group-item">
+                                        <span>
+                                            <%= ingredient.original %>
+                                        </span>
+                                    </div>
+                                <% }); %>
+                            </div>
+                        <% } else if(data.recipeInfo.ingredients) { %>
+                            <p><%= data.recipeInfo.ingredients %></p>
+                        <% } else { %>
+                            <p>No ingredients information available.</p>
+                        <% } %>
+                    </div>
+
+                    <div class="instructions mt-4">
+                        <h2>Instructions:</h2>
+                        <% if(data.recipeInfo.analyzedInstructions && data.recipeInfo.analyzedInstructions.length) { %>
+                            <ol>
+                                <% data.recipeInfo.analyzedInstructions[0].steps.forEach((step)=> { %>
+                                    <li><%= step.step %></li>
+                                <% }); %>
+                            </ol>
+                        <% } else if(data.recipeInfo.instructions) { %>
+                            <p><%= data.recipeInfo.instructions %></p>
+                        <% } else { %>
+                            <p>No instructions available.</p>
+                        <% } %>
+                    </div>
+
+                    <% if(data.recipeInfo.summary) { %>
+                        <div class="recipe-summary mt-4">
+                            <h2>Summary:</h2>
+                            <p><%- data.recipeInfo.summary %></p>
+                        </div>
+                    <% } %>
+
                 </div>
             </div>
-        </main>
+        </div>
+        <div class="col-md-4">
+            <!-- Include the comments section -->
+            <h1>Comment section</h1>
+            <%- include ('../partials/comments.ejs', { data: data }) %>
+        </div>
+    </div>
+</main>
 
-        <%- include ('../partials/footer') %>
-
-            <% function renderInstructions(instructions) { %>
-                <ol>
-                    <% instructions.forEach((step)=> { %>
-                        <li>
-                            <%= step.step %>
-                        </li>
-                        <% }); %>
-                </ol>
-                <% } %>
+<%- include ('../partials/footer') %>

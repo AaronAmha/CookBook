@@ -10,6 +10,12 @@ const session = require('express-session'); // To set the session object. To sto
 const bcrypt = require('bcrypt'); //  To hash passwords
 const axios = require('axios'); // To make HTTP requests from our server. We'll learn more about it in Part B.
 
+const multer = require('multer');
+const path = require('path');
+
+app.use(express.static('public'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 // *****************************************************
 // <!-- Section 2 : Connect to DB -->
@@ -192,7 +198,7 @@ app.get("/logout", (req, res) => {
   });
 });
 
-app.get('/discover', async (req, res) => {
+/*app.get('/discover', async (req, res) => {
   try {
     const userQuery = req.query.query || ''; // Retrieve the query parameter from the URL
     const response = await axios({
@@ -226,15 +232,66 @@ app.get('/discover', async (req, res) => {
     console.error(error);
     res.render('pages/discover', { recipes: [], error: 'API call failed' });
   }
+});*/
+
+app.get('/discover', async (req, res) => {
+  try {
+    // Fetch recipes from the API
+    await getApiRecipes(req.query.query || '');
+
+    // Fetch all recipes from the database
+    const allRecipes = await db.any('SELECT * FROM recipes');
+
+    res.render('pages/discover', { recipes: allRecipes });
+  } catch (error) {
+    console.error(error);
+    res.render('pages/discover', { recipes: [], error: 'Error fetching recipes' });
+  }
 });
+
+
+async function getApiRecipes(query) {
+  try {
+    const response = await axios({
+      url: 'https://api.spoonacular.com/recipes/complexSearch',
+      method: 'GET',
+      params: {
+        apiKey: process.env.API_KEY,
+        query: query,
+        number: 1, // Adjust the number of recipes you want to fetch
+      },
+    });
+
+    const apiRecipes = response.data.results;
+
+    // Insert or update the recipes in your database
+    await Promise.all(apiRecipes.map(async (recipe) => {
+      try {
+        // Here you can add logic to check if the recipe already exists in the database
+        // to avoid duplicates
+        await db.none('INSERT INTO recipes (recipe_id, title) VALUES ($1, $2) ON CONFLICT (recipe_id) DO NOTHING', [recipe.id, recipe.title]);
+      } catch (error) {
+        console.error(`Error handling recipe "${recipe.title}":`, error);
+      }
+    }));
+
+    return apiRecipes;
+  } catch (error) {
+    console.error('Error fetching recipes from API:', error);
+    return []; // Return an empty array in case of error
+  }
+}
+
+
+
+
 
 app.get('/addRecipe', async (req, res) => {
   res.render('pages/addRecipe');
 });
 
 
-const multer = require('multer');
-const path = require('path');
+
 
 
 // Configure Multer to handle file uploads
@@ -276,7 +333,7 @@ app.post('/addRecipe', upload.single('image'), async (req, res) => {
 
 // Sample route to retrieve and display recipe details
 
-app.get('/recipe/:id', async (req, res) => {
+/*app.get('/recipe/:id', async (req, res) => {
   const recipeId = req.params.id;
 
   try {
@@ -313,7 +370,51 @@ app.get('/recipe/:id', async (req, res) => {
     console.error(error);
     res.render('pages/recipe', { recipes: [], error: 'API call failed' });
   }
+}); */
+
+app.get('/recipe/:id', async (req, res) => {
+  const recipeId = req.params.id;
+  console.log("Requested recipe ID:", recipeId);
+
+  try {
+    let recipeInfo = await db.oneOrNone('SELECT * FROM recipes WHERE recipe_id = $1', [recipeId]);
+    console.log("Recipe info from DB:", recipeInfo);
+
+    // Check if the essential details are null and fetch from API if they are
+    if (!recipeInfo || recipeInfo.ingredients === null || recipeInfo.instructions === null) {
+      console.log("Fetching recipe from API...");
+      const response = await axios.get(`https://api.spoonacular.com/recipes/${recipeId}/information`, {
+        params: {
+          includeNutrition: false,
+          apiKey: process.env.API_KEY,
+        },
+      });
+      recipeInfo = response.data;
+      console.log("Recipe info from API:", recipeInfo);
+    }
+
+    const comments = await db.any('SELECT * FROM reviews WHERE recipe_id = $1', [recipeId]);
+    console.log("Comments:", comments);
+
+    // Now ensure that recipeInfo has the necessary fields for your template
+    // If certain fields are expected to be arrays, make sure to provide them as arrays
+    recipeInfo.ingredients = recipeInfo.ingredients || [];
+    recipeInfo.instructions = recipeInfo.instructions || [];
+
+    const data = {
+      recipeInfo: recipeInfo,
+      comments: comments
+    };
+    
+    res.render('pages/recipe', { data: data });
+  } catch (error) {
+    console.error("Error in /recipe/:id route:", error);
+    res.render('pages/recipe', { data: { recipeInfo: {}, comments: [] }, error: 'Failed to load recipe details.' });
+  }
 });
+
+
+
 
 // Comment section
 app.post('/recipe/:id/comment', async (req, res) => {

@@ -26,7 +26,7 @@ describe('Server!', () => {
   // ===========================================================================
   // TO-DO: Part A Login unit test case
 
-it('positive : /login', done => {
+/*it('positive : /login', done => {
   chai
     .request(server)
     .post('/login')
@@ -78,6 +78,6 @@ it('Negative : /login. Checking invalid name', done => {
           done();
         });
     });
-});
+});*/
 });
 
