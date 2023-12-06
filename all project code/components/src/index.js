@@ -62,6 +62,7 @@ app.use(
     secret: process.env.SESSION_SECRET,
     saveUninitialized: false,
     resave: false,
+    query : ""
   })
 );
 
@@ -414,10 +415,22 @@ app.post('/favorite/unfavorite', async (req, res) =>{
 app.get('/discover', async (req, res) => {
   try {
     // Fetch recipes from the API
-    await getApiRecipes(req.query.query || '', req);
-
+    await getApiRecipes(req.session.query || '', req);
+    console.log(req.session.query);
     // Fetch all recipes from the database
-    const allRecipes = await db.any('SELECT * FROM recipes');
+    var allRecipes;
+
+    if (req.session.query != null)
+    {
+      var string = "%" + req.session.query + "%";
+      allRecipes = await db.any("SELECT * FROM recipes where UPPER(title) like UPPER($1) ORDER BY title ASC", [string]);
+    }
+    else
+    {
+      allRecipes = await db.any("SELECT * FROM recipes ORDER BY title ASC");
+    }
+
+    
     var favoriteState = 0;
     var finalResults = {};
     var recipes = [];
@@ -465,11 +478,17 @@ app.get('/discover', async (req, res) => {
       const insertLikeState = await db.query('INSERT INTO likes (username, likeState, recipe_id) VALUES ($1, $2, $3) RETURNING *', [req.session.user.username, likeState, recipe.recipe_id]);
       
     }
-    res.render('pages/discover', { recipes: finalResults.recipes });
+    res.render('pages/discover', { recipes: finalResults.recipes, searchQuery : req.session.query });
   } catch (error) {
     console.error(error);
     res.render('pages/discover', { recipes: [], error: 'Error fetching recipes' });
   }
+});
+
+app.post('/discover', async (req, res) => {
+  req.session.query = req.body.query;
+  console.log(req.session.query);
+  res.redirect('/discover');
 });
 
 
@@ -573,6 +592,11 @@ app.get('/addRecipe', async (req, res) => {
     res.render('pages/addRecipe');
 });
 
+app.get('/myRecipe', async (req, res) => {
+  var allRecipes = await db.any("SELECT * FROM recipes where username = $1 ORDER BY title ASC", [req.session.user.username]);
+  res.render('pages/myRecipe', {recipes: allRecipes});
+});
+
 
 // Configure Multer to handle file uploads
 const storage = multer.diskStorage({
@@ -596,11 +620,11 @@ app.post('/addRecipe', upload.single('image'), async (req, res) => {
   const newId = - (parseInt(getCustomCount[0].count) + 1);
   try {
       const insertQuery = `
-          INSERT INTO recipes (recipe_id, title, ingredients, instructions, image, likes, customRecipe)
-          VALUES ($1, $2, $3, $4, $5, $6, $7)
+          INSERT INTO recipes (recipe_id, title, ingredients, instructions, image, likes, customRecipe, username)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
           RETURNING recipe_id;`;
 
-      const result = await db.one(insertQuery, [newId, name, ingredients, instructions, image, likes, 1]);
+      const result = await db.one(insertQuery, [newId, name, ingredients, instructions, image, likes, 1, req.session.user.username]);
       res.redirect(`/discover`);
   } catch (error) {
       console.error('Error adding recipe:', error);
@@ -718,7 +742,7 @@ app.get('/recipe/:id', async (req, res) => {
     console.log("Recipe info from DB:", recipeInfo);
 
     // Check if the essential details are null and fetch from API if they are
-    if (!recipeInfo || recipeInfo.ingredients === null || recipeInfo.instructions === null) {
+    if (!recipeInfo || recipeInfo.ingredients === null || recipeInfo.instructions === null || recipeInfo.image === null) {
       console.log("Fetching recipe from API...");
       const response = await axios.get(`https://api.spoonacular.com/recipes/${recipeId}/information`, {
         params: {
@@ -766,7 +790,9 @@ app.get('/recipe/:id', async (req, res) => {
       }
     }
     
-    res.render('pages/recipe', { data: data });
+    var removedHTMLFromSummary = recipeInfo.summary.replace( /(<([^>]+)>)/ig, '');
+
+    res.render('pages/recipe', { data: data , username: req.session.user.username, editedSummary: removedHTMLFromSummary});
   } catch (error) {
     console.error("Error in /recipe/:id route:", error);
     res.render('pages/recipe', { data: { recipeInfo: {}, comments: [] }, error: 'Failed to load recipe details.' });
@@ -777,7 +803,7 @@ app.get('/recipe/:id', async (req, res) => {
 app.post('/recipe/:id/comment', async (req, res) => {
   const recipeId = req.params.id;
   const review  = req.body.review;
-  const username = req.body.username;
+  const username = req.session.user.username;
   
   try {
     const reviewQuery = await db.query('INSERT INTO reviews (recipe_id, review_text, username) VALUES ($1, $2, $3) RETURNING review_id', [recipeId, review, username]);

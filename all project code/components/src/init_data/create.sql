@@ -37,7 +37,8 @@ CREATE TABLE recipes (
     instructions TEXT,
     image VARCHAR(255),
     likes INT,
-    customRecipe INT
+    customRecipe INT,
+    username VARCHAR(50) REFERENCES users(username) ON DELETE CASCADE
 );
 -- reviews table
 CREATE TABLE reviews (
@@ -64,6 +65,7 @@ CREATE TABLE reviews_to_recipes (
     FOREIGN KEY (recipe_id) REFERENCES recipes (recipe_id) ON DELETE CASCADE,
     FOREIGN KEY (review_id) REFERENCES reviews (review_id) ON DELETE CASCADE
 );
+
 INSERT INTO users (username, password) VALUES
     ('andrew', '$2b$10$CVNZ5EENn7gCVTelNRvIh.3Sl02Js2Zzi6ODrReYBTISQGEL3PXqy'),
     ('alice', '$2b$10$SomeRandomHashAlice'),

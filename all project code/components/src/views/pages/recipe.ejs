@@ -54,38 +54,69 @@
                         <% } %>
                     </div>
 
-                    <% if(data.recipeInfo.summary) { %>
+                    <% if(editedSummary) { %>
                         <div class="recipe-summary mt-4">
                             <h2>Summary:</h2>
-                            <p><%- data.recipeInfo.summary %></p>
+                            <p><%- editedSummary %></p>
                         </div>
                     <% } %>
                     <% if (data.likeState == 1){ %>
-                                
-                        <form action="/recipe/<%= data.recipeInfo.recipe_id %>/like" method="POST">
-                            <input type="hidden" name="like" value="<%= data.recipeInfo.recipe_id %>"/>
-                            <button type="submit" class="btn btn-primary" disabled>Like</button>
-                        </form>
+                        <% if (data.recipeInfo.recipe_id != null){ %>
+                            <form action="/recipe/<%= data.recipeInfo.recipe_id %>/like" method="POST">
+                                <input type="hidden" name="like" value="<%= data.recipeInfo.recipe_id %>"/>
+                                <button type="submit" class="btn btn-primary" disabled>Like</button>
+                            </form>
+                        <% }
+                        else { %>
+                            <form action="/recipe/<%= data.recipeInfo.id %>/like" method="POST">
+                                <input type="hidden" name="like" value="<%= data.recipeInfo.id %>"/>
+                                <button type="submit" class="btn btn-primary" disabled>Like</button>
+                            </form>
+                        <% } %>
                     <% } 
                     else { %>
-                        <form action="/recipe/<%= data.recipeInfo.recipe_id %>/like" method="POST">
-                            <input type="hidden" name="like" value="<%= data.recipeInfo.recipe_id %>"/>
-                            <button type="submit" class="btn btn-primary">Like</button>
-                        </form>
+                        <% if (data.recipeInfo.recipe_id != null){ %>
+                            <form action="/recipe/<%= data.recipeInfo.recipe_id %>/like" method="POST">
+                                <input type="hidden" name="like" value="<%= data.recipeInfo.recipe_id %>"/>
+                                <button type="submit" class="btn btn-primary">Like</button>
+                            </form>
+                        <% }
+                        else { %>
+                            <form action="/recipe/<%= data.recipeInfo.id %>/like" method="POST">
+                                <input type="hidden" name="like" value="<%= data.recipeInfo.id %>"/>
+                                <button type="submit" class="btn btn-primary">Like</button>
+                            </form>
+                        <% } %>
                     <% } %>
 
                     <% if (data.likeState == -1){ %>
                         
-                        <form action="/recipe/<%= data.recipeInfo.recipe_id %>/dislike" method="POST">
-                            <input type="hidden" name="dislike" value="<%= data.recipeInfo.recipe_id %>"/>
-                            <button type="submit" class="btn btn-primary" disabled>Dislike</button>
-                        </form>
+                        <% if (data.recipeInfo.recipe_id != null){ %>
+                            <form action="/recipe/<%= data.recipeInfo.recipe_id %>/dislike" method="POST">
+                                <input type="hidden" name="like" value="<%= data.recipeInfo.recipe_id %>"/>
+                                <button type="submit" class="btn btn-primary" disabled>Dislike</button>
+                            </form>
+                        <% }
+                        else { %>
+                            <form action="/recipe/<%= data.recipeInfo.id %>/dislike" method="POST">
+                                <input type="hidden" name="like" value="<%= data.recipeInfo.id %>"/>
+                                <button type="submit" class="btn btn-primary" disabled>Dislike</button>
+                            </form>
+                        <% } %>
                     <% } 
                     else { %>
-                        <form action="/recipe/<%= data.recipeInfo.recipe_id %>/dislike" method="POST">
-                            <input type="hidden" name="dislike" value="<%= data.recipeInfo.recipe_id %>"/>
-                            <button type="submit" class="btn btn-primary">Dislike</button>
-                        </form>
+                        <% if (data.recipeInfo.recipe_id != null){ %>
+                            <form action="/recipe/<%= data.recipeInfo.recipe_id %>/dislike" method="POST">
+                                <input type="hidden" name="like" value="<%= data.recipeInfo.recipe_id %>"/>
+                                <button type="submit" class="btn btn-primary">Dislike</button>
+                            </form>
+                        <% }
+                        else { %>
+                            <form action="/recipe/<%= data.recipeInfo.id %>/dislike" method="POST">
+                                <input type="hidden" name="like" value="<%= data.recipeInfo.id %>"/>
+                                <button type="submit" class="btn btn-primary">Dislike</button>
+                            </form>
+                        <% } %>
                     <% } %>
 
                 </div>

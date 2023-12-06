@@ -1,0 +1,43 @@
+
+<%- include ('../partials/head') %>
+<%- include ('../partials/menu') %>
+
+<main>
+    <div class="container my-4">
+        <h3 class="mb-4">My Recipes</h3>
+        <div id="DiscoverCards" class="row">
+                <% for (let recipe of recipes) { %>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <% if (recipe.image) { %>
+                                <% if (recipe.image.startsWith('http')) { %>
+                                    <!-- If the image is an external link, use it as is -->
+                                    <img src="<%= recipe.image %>" class="card-img-top" alt="<%= recipe.title %>">
+                                <% } else { %>
+                                    <!-- If the image is a filename, prepend the path to the uploads directory -->
+                                    <img src="/uploads/<%= recipe.image %>" class="card-img-top" alt="<%= recipe.title %>">
+                                <% } %>
+                            <% } else { %>
+                                <!-- If there is no image, use a default placeholder image -->
+                                <img src="/default-image.jpg" class="card-img-top" alt="Recipe Image">
+                            <% } %>
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <%= recipe.title %>
+                                </h5>
+                                <form action="/recipe/<%= recipe.recipe_id %>" method="GET">
+                                    <button type="submit" class="btn btn-primary">View Recipe</button>
+                                </form>             
+                                <p class="card-text">
+                                    Likes: <%= recipe.likes %>
+                                </p>   
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+        </div>
+    </div>
+</main>
+
+<%- include ('../partials/footer') %>
+
