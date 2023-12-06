@@ -31,11 +31,13 @@ CREATE TABLE chefs (
 
 
 CREATE TABLE recipes (
-    recipe_id INT NOT NULL,
-    title VARCHAR(200),
-    image VARCHAR,
+    recipe_id SERIAL PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    ingredients TEXT,
+    instructions TEXT,
+    image VARCHAR(255),
     likes INT,
-    PRIMARY KEY (recipe_id)
+    customRecipe INT
 );
 -- reviews table
 CREATE TABLE reviews (

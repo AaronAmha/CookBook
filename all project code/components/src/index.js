@@ -257,6 +257,7 @@ app.post('/discover/unfavorite', async (req, res) =>{
 
 app.post('/favorite/unfavorite', async (req, res) =>{
   const recipe_id = req.body.favorite;
+  var finalRecipe;
   console.log(recipe_id);
   const deleteFav = "delete from favorites where recipe_id = $1 and username = $2;";
   await db.one(deleteFav, [recipe_id, req.session.user.username])
@@ -291,13 +292,13 @@ app.get('/discover', async (req, res) => {
     var favoriteState = 0;
     var finalResults = {};
     var recipes = [];
+    var likeState;
+    var likes;
     finalResults.recipes = recipes;
      // Use Promise.all to wait for all database insert operations to complete
     await Promise.all(results.map(async (recipe) => {
       try {
         const queryFav = await db.query('select count(recipe_id) from favorites where recipe_id=$1 and username=$2', [recipe.id, req.session.user.username]);
-        var likeState;
-        var likes;
         try{
           const queryGetLike = await db.query('select likeState from likes where recipe_id=$1 and username=$2', [recipe.id, req.session.user.username]);
      
@@ -322,16 +323,17 @@ app.get('/discover', async (req, res) => {
         const getFavState = queryFav[0].count;
         favoriteState = getFavState;
 
-        var finalRecipe = {
+        finalRecipe = {
           "title" : recipe.title,
           "id" : recipe.id,
           "image" : recipe.image,
           "favorite" : getFavState,
-          "likes" : likes
+          "likes" : likes,
+          "customRecipe" : 0
         }
         finalResults.recipes.push(finalRecipe);
         try {
-          const query = await db.query('INSERT INTO recipes (recipe_id, title, image, likes) VALUES ($1, $2, $3, $4) RETURNING *', [recipe.id, recipe.title, recipe.image, likes]);
+          const query = await db.query('INSERT INTO recipes (recipe_id, title, image, likes, customRecipe) VALUES ($1, $2, $3, $4, $5) RETURNING *', [recipe.id, recipe.title, recipe.image, likes, 0]);
         }
         catch (err) {
 
@@ -343,6 +345,57 @@ app.get('/discover', async (req, res) => {
         //console.error(`Error adding recipe "${recipe.title}" or id ${recipe.id} to the database:`, error);
       }
     }));
+
+    try {
+      const getCustomRecipe = await db.query('Select * from recipes where customRecipe=$1', [1]);
+      console.log(getCustomRecipe.length);
+      for (var i = 0; i < getCustomRecipe.length; i++)
+      {
+        console.log(getCustomRecipe[i]);
+        var recipe = getCustomRecipe[i];
+        const queryFavCustom = await db.query('select count(recipe_id) from favorites where recipe_id=$1 and username=$2', [recipe.id, req.session.user.username]);
+        try{
+          const queryGetLikeCustom = await db.query('select likeState from likes where recipe_id=$1 and username=$2', [recipe.id, req.session.user.username]);
+     
+          likeState = queryGetLikeCustom[0].likestate;
+        }
+        catch(error)
+        {
+          likeState = 0;
+        }
+
+        try{
+          const queryGetLikesCustom = await db.query('select likes from recipes where recipe_id=$1', [recipe.id]);
+     
+          likes = queryGetLikesCustom[0].likes;
+        }
+        catch(error)
+        {
+          likes = 0;
+        }
+
+
+        const getFavStateCustom = queryFavCustom[0].count;
+        favoriteState = getFavStateCustom;
+
+        finalRecipe = {
+          "title" : recipe.title,
+          "id" : recipe.recipeId,
+          "image" : recipe.image,
+          "favorite" : favoriteState,
+          "likes" : likes,
+          "customRecipe" : 1
+        }
+        finalResults.recipes.push(finalRecipe);
+        const insertLikeStateCustom = await db.query('INSERT INTO likes (username, likeState, recipe_id) VALUES ($1, $2, $3) RETURNING *', [req.session.user.username, likeState, recipe.id]);
+      }
+    }
+    catch (err)
+    {
+
+    }
+
+
     console.log(finalResults);
     res.render('pages/discover', { recipes: finalResults});
     
@@ -372,23 +425,24 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+
 app.post('/addRecipe', upload.single('image'), async (req, res) => {
   const { name, ingredients, instructions } = req.body;
-  const image = req.file ? req.file.filename : null; // Only store the file name or a reference in the database
-
+  const image = req.file ? req.file.filename : null; // Only store the file name
+  const likes = 0; // Default number of likes
+  const getCustomCount = await db.query('select count(*) from recipes where customRecipe=1');
+  console.log(getCustomCount);
+  const newId = - (parseInt(getCustomCount[0].count) + 1);
   try {
       const insertQuery = `
-          INSERT INTO recipes (name, ingredients, instructions, image)
-          VALUES ($1, $2, $3, $4)
-          RETURNING id;`;
+          INSERT INTO recipes (recipe_id, title, ingredients, instructions, image, likes, customRecipe)
+          VALUES ($1, $2, $3, $4, $5, $6, $7)
+          RETURNING recipe_id;`;
 
-      // Execute the insert query with the form data
-      const result = await db.one(insertQuery, [name, ingredients, instructions, image]);
-
-      // Redirect to the 'discover' page with the new recipe id
-      res.redirect(`/discover?query=${name}`);
+      const result = await db.one(insertQuery, [newId, name, ingredients, instructions, image, likes, 1]);
+      res.redirect(`/discover`);
   } catch (error) {
-      console.error('Error saving recipe:', error);
+      console.error('Error adding recipe:', error);
       res.render('pages/addRecipe', { message: 'Failed to add recipe. Please try again.' });
   }
 });
@@ -398,86 +452,93 @@ app.post('/addRecipe', upload.single('image'), async (req, res) => {
 
 app.get('/recipe/:id', async (req, res) => {
   const recipeId = req.params.id;
-
+  var response;
+  var recipeInfo;
   try {
-    const response = await axios.get(`https://api.spoonacular.com/recipes/${recipeId}/information`, {
+    response = await axios.get(`https://api.spoonacular.com/recipes/${recipeId}/information`, {
       params: {
         includeNutrition: false, // Adjust as needed
         apiKey: process.env.API_KEY,
       },
     });
+    recipeInfo = response.data;
+  }
+  catch (error) {
+    //console.error(error);
+    //res.render('pages/recipe', { recipes: [], error: 'API call failed' });
+    response = await db.query('select * from recipes where recipeId=$1',[recipeId]);
+    var responseData={
+      "title" : response.title,
+      "image" : response.image
+    }
+    recipeInfo = response.data;
+  }
 
-    //Adding some reviews to the recipes
-      const reviews = [
-        // Reviews data for the corresponding recipeId
-        { review_text: 'Delicious dish! Loved the flavors.', username: 'alice', recipe_id: recipeId },
-        { review_text: 'The chicken alfredo was creamy and tasty.', username: 'bob', recipe_id: recipeId },
-        { review_text: 'The chicken alfredo was creamy and tasty.', username: 'bob', recipe_id: recipeId },
-        { review_text: 'Fantastic recipe! Easy to follow.', username: 'charlie', recipe_id: recipeId },
-        { review_text: 'I added extra spices, and it turned out amazing!', username: 'diana', recipe_id: recipeId },
-        { review_text: 'Not a fan of this one. Too bland for my taste.', username: 'eve', recipe_id: recipeId }
-      ];
-      
-      const existingReviews = await db.any('SELECT * FROM reviews WHERE recipe_id = $1', [recipeId]);
+  //Adding some reviews to the recipes
+    const reviews = [
+      // Reviews data for the corresponding recipeId
+      { review_text: 'Delicious dish! Loved the flavors.', username: 'alice', recipe_id: recipeId },
+      { review_text: 'The chicken alfredo was creamy and tasty.', username: 'bob', recipe_id: recipeId },
+      { review_text: 'The chicken alfredo was creamy and tasty.', username: 'bob', recipe_id: recipeId },
+      { review_text: 'Fantastic recipe! Easy to follow.', username: 'charlie', recipe_id: recipeId },
+      { review_text: 'I added extra spices, and it turned out amazing!', username: 'diana', recipe_id: recipeId },
+      { review_text: 'Not a fan of this one. Too bland for my taste.', username: 'eve', recipe_id: recipeId }
+    ];
+    
+    const existingReviews = await db.any('SELECT * FROM reviews WHERE recipe_id = $1', [recipeId]);
 
-      if (existingReviews.length === 0) {
+    if (existingReviews.length === 0) {
       // Insert reviews into the reviews table
       for (const review of reviews) {
         await db.query('INSERT INTO reviews (review_text, username, recipe_id) VALUES ($1, $2, $3)', [review.review_text, review.username, review.recipe_id]);
       }
     }
-
-    const recipeInfo = response.data;
-
-    console.log("selecting from database");
-    //const comments = await db.query(`SELECT review_text AND username FROM reviews WHERE recipe_id = ${recipeId}`);
-    const comments = await db.any(`SELECT * FROM reviews WHERE recipe_id = ${recipeId}`);
-    var likeState;
-    try{
-      likeState = await db.any(`SELECT likeState FROM likes WHERE recipe_id = $1 and username = $2`, [recipeId, req.session.user.username]);
-      console.log(likeState);
-    }
-    catch (error)
-    {
-      likeState = null;
-    }
-
-    var data;
-    if (likeState == null || likeState[0] == null || likeState[0].likestate == null)
-    {
-      data = {
-        "recipeInfo": recipeInfo,
-        "comments": comments,
-        "likeState" : 0
-      }
-    }
-    else
-    {
-      data = {
-        "recipeInfo": recipeInfo,
-        "comments": comments,
-        "likeState" : likeState[0].likestate
-      }
-    }
-
-    //console.log(likeState);
-   
-    //console.log(data);
-    // const commentsQuery = await db.query(
-    //   'SELECT r.username, r.review_text FROM reviews r ' +
-    //   'JOIN reviews_to_recipes rr ON r.review_id = rr.review_id ' +
-    //   'WHERE rr.recipe_id = $1',
-    //   [recipeId]
-    // );
-
-    //const comments = commentsQuery.rows;
-    
-
-    res.render('pages/recipe', { data: data });
-  } catch (error) {
-    console.error(error);
-    res.render('pages/recipe', { recipes: [], error: 'API call failed' });
+  
+  console.log(recipeInfo);
+  //const comments = await db.query(`SELECT review_text AND username FROM reviews WHERE recipe_id = ${recipeId}`);
+  const comments = await db.any(`SELECT * FROM reviews WHERE recipe_id = ${recipeId}`);
+  var likeState;
+  try{
+    likeState = await db.any(`SELECT likeState FROM likes WHERE recipe_id = $1 and username = $2`, [recipeId, req.session.user.username]);
+    console.log(likeState);
   }
+  catch (error)
+  {
+    likeState = null;
+  }
+
+  var data;
+  if (likeState == null || likeState[0] == null || likeState[0].likestate == null)
+  {
+    data = {
+      "recipeInfo": recipeInfo,
+      "comments": comments,
+      "likeState" : 0
+    }
+  }
+  else
+  {
+    data = {
+      "recipeInfo": recipeInfo,
+      "comments": comments,
+      "likeState" : likeState[0].likestate
+    }
+  }
+
+  //console.log(likeState);
+  
+  //console.log(data);
+  // const commentsQuery = await db.query(
+  //   'SELECT r.username, r.review_text FROM reviews r ' +
+  //   'JOIN reviews_to_recipes rr ON r.review_id = rr.review_id ' +
+  //   'WHERE rr.recipe_id = $1',
+  //   [recipeId]
+  // );
+
+  //const comments = commentsQuery.rows;
+  
+
+  res.render('pages/recipe', { data: data });
 });
 
 // Comment section
