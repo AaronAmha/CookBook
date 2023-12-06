@@ -10,6 +10,12 @@ const session = require('express-session'); // To set the session object. To sto
 const bcrypt = require('bcrypt'); //  To hash passwords
 const axios = require('axios'); // To make HTTP requests from our server. We'll learn more about it in Part B.
 
+const multer = require('multer');
+const path = require('path');
+
+app.use(express.static('public'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 // *****************************************************
 // <!-- Section 2 : Connect to DB -->
@@ -271,7 +277,7 @@ app.post('/favorite/unfavorite', async (req, res) =>{
   res.redirect('/favorite');
 });
 
-app.get('/discover', async (req, res) => {
+/*app.get('/discover', async (req, res) => {
   try {
     const userQuery = req.query.query || ''; // Retrieve the query parameter from the URL
     const response = await axios({
@@ -403,15 +409,170 @@ app.get('/discover', async (req, res) => {
     console.error(error);
     res.render('pages/discover', { recipes: [], error: 'API call failed' });
   }
+});*/
+
+app.get('/discover', async (req, res) => {
+  try {
+    // Fetch recipes from the API
+    await getApiRecipes(req.query.query || '', req);
+
+    // Fetch all recipes from the database
+    const allRecipes = await db.any('SELECT * FROM recipes');
+    var favoriteState = 0;
+    var finalResults = {};
+    var recipes = [];
+    var likeState;
+    var likes;
+    finalResults.recipes = recipes;
+    for (var i = 0; i < allRecipes.length; i++)
+    {
+      var recipe = allRecipes[i];
+      const queryFav = await db.query('select count(recipe_id) from favorites where recipe_id=$1 and username=$2', [recipe.recipe_id, req.session.user.username]);
+      try{
+        const queryGetLike = await db.query('select likeState from likes where recipe_id=$1 and username=$2', [recipe.recipe_id, req.session.user.username]);
+   
+        likeState = queryGetLike[0].likestate;
+      }
+      catch(error)
+      {
+        likeState = 0;
+      }
+  
+      try{
+        const queryGetLikes = await db.query('select likes from recipes where recipe_id=$1', [recipe.recipe_id]);
+   
+        likes = queryGetLikes[0].likes;
+      }
+      catch(error)
+      {
+        likes = 0;
+      }
+  
+  
+      const getFavState = queryFav[0].count;
+      favoriteState = getFavState;
+  
+      finalRecipe = {
+        "title" : recipe.title,
+        "recipe_id" : recipe.recipe_id,
+        "image" : recipe.image,
+        "favorite" : getFavState,
+        "likes" : likes,
+        "customRecipe" : 0
+      }
+      finalResults.recipes.push(finalRecipe);
+      
+      const insertLikeState = await db.query('INSERT INTO likes (username, likeState, recipe_id) VALUES ($1, $2, $3) RETURNING *', [req.session.user.username, likeState, recipe.recipe_id]);
+      
+    }
+    res.render('pages/discover', { recipes: finalResults.recipes });
+  } catch (error) {
+    console.error(error);
+    res.render('pages/discover', { recipes: [], error: 'Error fetching recipes' });
+  }
 });
+
+
+/*async function getApiRecipes(query) {
+  try {
+    const response = await axios({
+      url: 'https://api.spoonacular.com/recipes/complexSearch',
+      method: 'GET',
+      params: {
+        apiKey: process.env.API_KEY,
+        query: query,
+        number: 1, // Adjust the number of recipes you want to fetch
+      },
+    });
+
+    const apiRecipes = response.data.results;
+
+    // Insert or update the recipes in your database
+    await Promise.all(apiRecipes.map(async (recipe) => {
+      try {
+        // Here you can add logic to check if the recipe already exists in the database
+        // to avoid duplicates
+        await db.none('INSERT INTO recipes (recipe_id, title) VALUES ($1, $2) ON CONFLICT (recipe_id) DO NOTHING', [recipe.id, recipe.title]);
+      } catch (error) {
+        console.error(`Error handling recipe "${recipe.title}":`, error);
+      }
+    }));
+
+    return apiRecipes;
+  } catch (error) {
+    console.error('Error fetching recipes from API:', error);
+    return []; // Return an empty array in case of error
+  }
+}*/
+
+async function getApiRecipes(query, req) {
+  try {
+    const response = await axios({
+      url: 'https://api.spoonacular.com/recipes/complexSearch',
+      method: 'GET',
+      params: {
+        apiKey: process.env.API_KEY,
+        query: query,
+        number: 1, // Adjust the number of recipes you want to fetch
+        addRecipeInformation: true, // This will include image URLs in the response
+      },
+    });
+
+    const apiRecipes = response.data.results;
+    var favoriteState = 0;
+    var likeState;
+    var likes;
+    // Insert or update the recipes in your database
+    await Promise.all(apiRecipes.map(async (recipe) => {
+      try {
+        // Now include the image URL in your insert/update query
+        
+        const queryFav = await db.query('select count(recipe_id) from favorites where recipe_id=$1 and username=$2', [recipe.id, req.session.user.username]);
+        try{
+          const queryGetLike = await db.query('select likeState from likes where recipe_id=$1 and username=$2', [recipe.id, req.session.user.username]);
+     
+          likeState = queryGetLike[0].likestate;
+        }
+        catch(error)
+        {
+          likeState = 0;
+        }
+
+        try{
+          const queryGetLikes = await db.query('select likes from recipes where recipe_id=$1', [recipe.id]);
+     
+          likes = queryGetLikes[0].likes;
+        }
+        catch(error)
+        {
+          likes = 0;
+        }
+
+        await db.none('INSERT INTO recipes (recipe_id, title, image, likes) VALUES ($1, $2, $3, $4) ON CONFLICT (recipe_id) DO UPDATE SET title = $2, image = $3', [recipe.id, recipe.title, recipe.image, likes]);
+        const getFavState = queryFav[0].count;
+        favoriteState = getFavState;
+        const insertLikeState = await db.query('INSERT INTO likes (username, likeState, recipe_id) VALUES ($1, $2, $3) RETURNING *', [req.session.user.username, likeState, recipe.id]);
+      } catch (error) {
+        console.error(`Error handling recipe "${recipe.title}":`, error);
+      }
+    }));
+
+    return apiRecipes;
+  } catch (error) {
+    console.error('Error fetching recipes from API:', error);
+    return []; // Return an empty array in case of error
+  }
+}
+
+
+
+
 
 
 app.get('/addRecipe', async (req, res) => {
     res.render('pages/addRecipe');
 });
 
-const multer = require('multer');
-const path = require('path');
 
 // Configure Multer to handle file uploads
 const storage = multer.diskStorage({
@@ -450,7 +611,7 @@ app.post('/addRecipe', upload.single('image'), async (req, res) => {
 
 // Sample route to retrieve and display recipe details
 
-app.get('/recipe/:id', async (req, res) => {
+/*app.get('/recipe/:id', async (req, res) => {
   const recipeId = req.params.id;
   var response;
   var recipeInfo;
@@ -524,6 +685,7 @@ app.get('/recipe/:id', async (req, res) => {
       "likeState" : likeState[0].likestate
     }
   }
+  
 
   //console.log(likeState);
   
@@ -538,7 +700,77 @@ app.get('/recipe/:id', async (req, res) => {
   //const comments = commentsQuery.rows;
   
 
-  res.render('pages/recipe', { data: data });
+    res.render('pages/recipe', { data: data });
+  } catch (error) {
+    console.error(error);
+    res.render('pages/recipe', { recipes: [], error: 'API call failed' });
+  }
+});
+*/
+
+
+app.get('/recipe/:id', async (req, res) => {
+  const recipeId = req.params.id;
+  console.log("Requested recipe ID:", recipeId);
+
+  try {
+    let recipeInfo = await db.oneOrNone('SELECT * FROM recipes WHERE recipe_id = $1', [recipeId]);
+    console.log("Recipe info from DB:", recipeInfo);
+
+    // Check if the essential details are null and fetch from API if they are
+    if (!recipeInfo || recipeInfo.ingredients === null || recipeInfo.instructions === null) {
+      console.log("Fetching recipe from API...");
+      const response = await axios.get(`https://api.spoonacular.com/recipes/${recipeId}/information`, {
+        params: {
+          includeNutrition: false,
+          apiKey: process.env.API_KEY,
+        },
+      });
+      recipeInfo = response.data;
+      console.log("Recipe info from API:", recipeInfo);
+    }
+
+    const comments = await db.any('SELECT * FROM reviews WHERE recipe_id = $1', [recipeId]);
+    console.log("Comments:", comments);
+
+    // Now ensure that recipeInfo has the necessary fields for your template
+    // If certain fields are expected to be arrays, make sure to provide them as arrays
+    recipeInfo.ingredients = recipeInfo.ingredients || [];
+    recipeInfo.instructions = recipeInfo.instructions || [];
+
+    var likeState;
+    try{
+      likeState = await db.any(`SELECT likeState FROM likes WHERE recipe_id = $1 and username = $2`, [recipeId, req.session.user.username]);
+      console.log(likeState);
+    }
+    catch (error)
+    {
+      likeState = null;
+    }
+
+    var data;
+    if (likeState == null || likeState[0] == null || likeState[0].likestate == null)
+    {
+      data = {
+        "recipeInfo": recipeInfo,
+        "comments": comments,
+        "likeState" : 0
+      }
+    }
+    else
+    {
+      data = {
+        "recipeInfo": recipeInfo,
+        "comments": comments,
+        "likeState" : likeState[0].likestate
+      }
+    }
+    
+    res.render('pages/recipe', { data: data });
+  } catch (error) {
+    console.error("Error in /recipe/:id route:", error);
+    res.render('pages/recipe', { data: { recipeInfo: {}, comments: [] }, error: 'Failed to load recipe details.' });
+  }
 });
 
 // Comment section
