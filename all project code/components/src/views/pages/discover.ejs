@@ -1,54 +1,72 @@
 <%- include ('../partials/head') %>
-<%- include ('../partials/menu') %>
+    <%- include ('../partials/menu') %>
 
-<main>
-    <div class="container">
-    <h1>Discover recipes</h1>
-    
-    <!-- Search form -->
-    <form action="/discover" method="GET">
-    <div class="input-group mb-3">
-        <input type="text" class="form-control" placeholder="Search recipes" name="query">
-        <div class="input-group-append">
-            <button class="btn btn-secondary" type="submit">Search</button>
-        </div>
-    </div>
-    </form>
-    
-    <!-- Iterate through the recipes and display them as cards -->
-    <div id="DiscoverCards" class="row">
-    <% for (let recipe of recipes.recipes) { %>
-        <div class="col-md-4">
-            <div class="card">
-            <img src="<%= recipe.image %>" class="card-img-top" alt="Recipe Image">
-            <div class="card-body">
-                <h5 class="card-title">
-                    <%= recipe.title %>
-                </h5>
-                <form action="/recipe/<%= recipe.id %>" method="GET">
-                    <button type="submit" class="btn btn-primary">View Recipe</button>
+        <main>
+            <div class="container">
+                <h1>Discover recipes</h1>
+
+                <!-- Search form -->
+                <form action="/discover" method="POST">
+                    <div class="input-group mb-3">
+                        <% if (searchQuery != null) { %>
+                            <input type="text" value="<%= searchQuery %>" class="form-control" placeholder="Search recipes" name="query">
+                        <% } 
+                        else { %>
+                            <input type="text" class="form-control" placeholder="Search recipes" name="query">
+                        <% } %>
+                        <div class="input-group-append">
+                            <button class="btn btn-secondary" type="submit">Search</button>
+                        </div>
+                    </div>
                 </form>
-                <% if (recipe.favorite == 0){ %>
-                        <form action="/discover/favorite" method="POST">
-                            <input type="hidden" name="favorite" value="<%= recipe.id %>"/>
-                            <button type="submit" class="btn btn-primary">Favorite</button>
-                        </form>
-                <% } 
-                    else { %>
-                        <form action="/discover/unfavorite" method="POST">
-                            <input type="hidden" name="favorite" value="<%= recipe.id %>"/>
-                            <button type="submit" class="btn btn-primary">Unfavorite</button>
-                        </form>
-                    <% } %>
-                <p class="card-text">
-                    Likes: <%= recipe.likes %>
-                </p>
-            </div>
-            </div>
-            </div>
-            <% } %>
-                </div>
-</div>
-</main>
 
-<%- include ('../partials/footer') %>
+                <!-- Iterate through the recipes and display them as cards -->
+                <div id="DiscoverCards" class="row">
+                    <% for (let recipe of recipes) { %>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <% if (recipe.image) { %>
+                                    <% if (recipe.image.startsWith('http')) { %>
+                                        <!-- If the image is an external link, use it as is -->
+                                        <img src="<%= recipe.image %>" class="card-img-top" alt="<%= recipe.title %>">
+                                    <% } else { %>
+                                        <!-- If the image is a filename, prepend the path to the uploads directory -->
+                                        <img src="/uploads/<%= recipe.image %>" class="card-img-top" alt="<%= recipe.title %>">
+                                    <% } %>
+                                <% } else { %>
+                                    <!-- If there is no image, use a default placeholder image -->
+                                    <img src="/default-image.jpg" class="card-img-top" alt="Recipe Image">
+                                <% } %>
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <%= recipe.title %>
+                                    </h5>
+                                    <form action="/recipe/<%= recipe.recipe_id %>" method="GET">
+                                        <button type="submit" class="btn btn-primary">View Recipe</button>
+                                    </form>             
+                                    <% if (recipe.favorite == 0){ %>
+                                        <form action="/discover/favorite" method="POST">
+                                            <input type="hidden" name="favorite" value="<%= recipe.recipe_id %>"/>
+                                            <button type="submit" class="btn btn-primary">Favorite</button>
+                                        </form>
+                                    <% } 
+                                        else { %>
+                                            <form action="/discover/unfavorite" method="POST">
+                                                <input type="hidden" name="favorite" value="<%= recipe.recipe_id %>"/>
+                                                <button type="submit" class="btn btn-primary">Unfavorite</button>
+                                            </form>
+                                        <% } %>
+                                    <p class="card-text">
+                                        Likes: <%= recipe.likes %>
+                                    </p>   
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                    
+
+                </div>
+            </div>
+        </main>
+
+        <%- include ('../partials/footer') %>

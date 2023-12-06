@@ -4,7 +4,7 @@ DROP TABLE IF EXISTS recipes CASCADE;
 DROP TABLE IF EXISTS chefs CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS favorites CASCADE;
-
+DROP TABLE IF EXISTS likes CASCADE;
 
 
 CREATE TABLE users (
@@ -31,13 +31,14 @@ CREATE TABLE chefs (
 
 
 CREATE TABLE recipes (
-    recipe_id INT NOT NULL,
-    title VARCHAR(200),
-    favorite INT,
-    image VARCHAR,
-    likeState INT,
+    recipe_id SERIAL PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    ingredients TEXT,
+    instructions TEXT,
+    image VARCHAR(255),
     likes INT,
-    PRIMARY KEY (recipe_id)
+    customRecipe INT,
+    username VARCHAR(50) REFERENCES users(username) ON DELETE CASCADE
 );
 -- reviews table
 CREATE TABLE reviews (
@@ -47,9 +48,14 @@ CREATE TABLE reviews (
     recipe_id INT REFERENCES recipes(recipe_id) ON DELETE CASCADE
 );
 
+CREATE TABLE likes (
+    username VARCHAR(50) REFERENCES users(username) on delete CASCADE,
+    likeState INT,
+    recipe_id INT REFERENCES recipes(recipe_id) ON DELETE CASCADE
+);
 
 CREATE TABLE favorites (
-    favorite_ID SERIAL PRIMARY KEY,
+    username VARCHAR(50) REFERENCES users(username) on delete CASCADE,
     recipe_id INT REFERENCES recipes(recipe_id) ON DELETE CASCADE
 );
 
@@ -59,6 +65,7 @@ CREATE TABLE reviews_to_recipes (
     FOREIGN KEY (recipe_id) REFERENCES recipes (recipe_id) ON DELETE CASCADE,
     FOREIGN KEY (review_id) REFERENCES reviews (review_id) ON DELETE CASCADE
 );
+
 INSERT INTO users (username, password) VALUES
     ('andrew', '$2b$10$CVNZ5EENn7gCVTelNRvIh.3Sl02Js2Zzi6ODrReYBTISQGEL3PXqy'),
     ('alice', '$2b$10$SomeRandomHashAlice'),
