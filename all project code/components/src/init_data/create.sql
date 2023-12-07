@@ -25,8 +25,7 @@ CREATE TABLE chefs (
     email VARCHAR(100) NOT NULL,
     dob DATE NOT NULL,
     profilePic VARCHAR(255),
-    FOREIGN KEY (username) REFERENCES users(username)
-    
+    FOREIGN KEY (username) REFERENCES users(username) 
 );
 
 
@@ -73,3 +72,13 @@ INSERT INTO users (username, password) VALUES
     ('charlie', '$2b$10$SomeRandomHashCharlie'),
     ('diana', '$2b$10$SomeRandomHashDiana'),
     ('eve', '$2b$10$SeRandomHashDiana');
+
+    INSERT INTO chefs (username, password, first_name, last_name, email, dob, profilePic)
+VALUES
+    ('andrew', '$2b$10$CVNZ5EENn7gCVTelNRvIh.3Sl02Js2Zzi6ODrReYBTISQGEL3PXqy', 'Andrew', 'Smith', 'andrew@example.com', '1990-01-01', 'andrew_profile.jpg'),
+    ('alice', '$2b$10$SomeRandomHashAlice', 'Alice', 'Johnson', 'alice@example.com', '1992-03-15', 'alice_profile.jpg'),
+    ('bob', '$2b$10$SomeRandomHashBob', 'Bob', 'Jones', 'bob@example.com', '1985-07-22', 'bob_profile.jpg'),
+    ('charlie', '$2b$10$SomeRandomHashCharlie', 'Charlie', 'Brown', 'charlie@example.com', '1998-12-05', 'charlie_profile.jpg'),
+    ('diana', '$2b$10$SomeRandomHashDiana', 'Diana', 'Miller', 'diana@example.com', '1982-09-10', 'diana_profile.jpg'),
+    ('eve', '$2b$10$SeRandomHashDiana', 'Eve', 'White', 'eve@example.com', '1995-06-28', 'eve_profile.jpg');
+

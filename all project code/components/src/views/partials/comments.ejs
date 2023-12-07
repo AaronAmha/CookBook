@@ -5,7 +5,9 @@
         <form action="/recipe/<%= data.recipe_id %>/comment" method="POST">
             <div class="form-group">
                 <label for="username">Username:</label>
-                <label for="username"><%=username%></label>
+                <a href="/otherUsersProfile/<%= username %>">
+                    <%= username %>
+                </a>:
                 <!-- <input type="text" class="form-control" id="username" name="username" required> -->
             </div>
             <div class="form-group">
@@ -21,7 +23,9 @@
                 <% data.comments.forEach(comment=> { %>
                     <li class="mb-3 border p-3">
                         <strong>
+                            <a href="/otherUsersProfile/<%= comment.username %>">
                             <%= comment.username %>:
+                        </a>
                         </strong>
                         <%= comment.review_text %>
                     </li>
@@ -33,3 +37,4 @@
             <% } %>
     </div>
 </div>
+

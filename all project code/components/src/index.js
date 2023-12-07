@@ -1,3 +1,6 @@
+
+
+
 // *****************************************************
 // <!-- Section 1 : Import Dependencies -->
 // *****************************************************
@@ -166,6 +169,19 @@ app.get('/profile', async(req, res) => {
   try
   {
     const myProfile = await db.oneOrNone('SELECT * FROM chefs WHERE username = $1', [req.session.user.username]);
+    res.render("pages/profile", { chef: myProfile});  
+  }
+  catch(error) {
+    console.error(error);
+  }
+});
+
+app.get('/otherUsersProfile/:username', async(req, res) => {
+  //do something
+  const username = req.params.username;
+  try
+  {
+    const myProfile = await db.oneOrNone('SELECT * FROM chefs WHERE username = $1', [req.params.username]);
     res.render("pages/profile", { chef: myProfile});  
   }
   catch(error) {
@@ -569,7 +585,7 @@ async function getApiRecipes(query, req) {
       params: {
         apiKey: process.env.API_KEY,
         query: query,
-        number: 1, // Adjust the number of recipes you want to fetch
+        number: 10, // Adjust the number of recipes you want to fetch
         addRecipeInformation: true, // This will include image URLs in the response
       },
     });
@@ -605,6 +621,24 @@ async function getApiRecipes(query, req) {
         }
 
         await db.none('INSERT INTO recipes (recipe_id, title, image, likes) VALUES ($1, $2, $3, $4) ON CONFLICT (recipe_id) DO UPDATE SET title = $2, image = $3', [recipe.id, recipe.title, recipe.image, likes]);
+
+        //Adding example Reviews to each recipe
+        const recipeId = recipe.id; // Accessing the recipe ID
+        const customReviews = [
+          { review_text: 'Delicious!', username: 'andrew' },
+          { review_text: 'Easy to make and so tasty.', username: 'alice' }
+        ];
+
+        // Insert each custom review into the reviews table
+        await Promise.all(customReviews.map(async (customReview) => {
+          const existingReview = await db.oneOrNone('SELECT * FROM reviews WHERE recipe_id = $1 AND username = $2', [recipeId, customReview.username]);
+
+          if (!existingReview) {
+            // If the review doesn't exist, insert it
+            await db.none('INSERT INTO reviews (recipe_id, review_text, username) VALUES ($1, $2, $3)', [recipeId, customReview.review_text, customReview.username]);
+          }
+        }));
+        
         const getFavState = queryFav[0].count;
         favoriteState = getFavState;
         const insertLikeState = await db.query('INSERT INTO likes (username, likeState, recipe_id) VALUES ($1, $2, $3) RETURNING *', [req.session.user.username, likeState, recipe.id]);
@@ -619,10 +653,6 @@ async function getApiRecipes(query, req) {
     return []; // Return an empty array in case of error
   }
 }
-
-
-
-
 
 
 app.get('/addRecipe', async (req, res) => {
