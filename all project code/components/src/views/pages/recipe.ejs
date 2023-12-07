@@ -47,7 +47,15 @@
                                 <% }); %>
                             </div>
                         <% } else if(data.recipeInfo.ingredients) { %>
-                            <p><%= data.recipeInfo.ingredients %></p>
+                            <div class="list-group">
+                                <% data.recipeInfo.ingredients.forEach((ingredient)=> { %>
+                                    <div class="list-group-item">
+                                        <span>
+                                            <%= ingredient %>
+                                        </span>
+                                    </div>
+                                <% }); %>
+                            </div>
                         <% } else { %>
                             <p>No ingredients information available.</p>
                         <% } %>
@@ -68,7 +76,7 @@
                         <% } %>
                     </div>
 
-                    <% if(editedSummary != null) { %>
+                    <% if(editedSummary != null && editedSummary != "") { %>
                         <div class="recipe-summary mt-4">
                             <h2>Summary:</h2>
                             <p><%- editedSummary %></p>
@@ -137,7 +145,7 @@
         </div>
         <div class="col-md-4">
             <!-- Include the comments section -->
-            <h1>Comment section</h1>
+            <h1>Comment Section</h1>
             <%- include ('../partials/comments.ejs', { data: data }) %>
         </div>
     </div>
