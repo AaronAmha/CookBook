@@ -13,7 +13,7 @@ var superagent = require('superagent');
 var user = superagent.agent();
 //var agent = request.agent('http://localhost:3000');
 
-/*
+
 describe('Server!', () => {
 
   // Sample test case given to test / endpoint.
@@ -123,7 +123,7 @@ describe('Viewing Recipes', () => {
   });
 });
 
-*/
+
 
 
 
