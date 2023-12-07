@@ -12,7 +12,7 @@ Michael Dempsey
 Alex Foucher
 Sarah Sharroufna
 
-4. Technology Stack - HTML, JavaScript, SQL, Docker, Spoonacular
+4. Technology Stack - HTML, JavaScript, SQL, Docker, Spoonacular, Microsoft Azure
 
 5. Prerequisites to run the application - Docker
 
