@@ -2,21 +2,28 @@
 Software Development CSCI 3308 Group Project
 
 1. Application Description
-The application will be designed to allow users to share their recipes with other users. They will be able to upload photos of their final dishes. Users will be able to like or dislike the recipes posted to the page, and the most liked recipes will be shown first. 
-We also want to include a “cook friends” where the user can add other users as friends, and then the only posts on the “cook friends” page will be those of the users added as friends. We want to allow for the users to be able to sort by food type as well using a search bar. 
+The application allows users to share their recipes with others as well as get ideas for recipes from an external API called Spoonacular. Users are able to upload photos of their final dishes and add ingredients/instructions. Users will be able to like or dislike the recipes posted on the page, and the recipes can be sorted by most liked.
+Additionally, users can favorite recipes, which will cause the recipe to be shown in the Favorites tab.
+Finally, users can look at their profile page, which will provide all their information and a slideshow of their recipes. 
 
-2. Contributers -
+3. Contributers -
 Aaron Amha
 Michael Dempsey
 Alex Foucher
 Sarah Sharroufna
 
-3. Technology Slack (TO DO) -
+4. Technology Stack - HTML, JavaScript, SQL, Docker, Spoonacular
 
-4. Prerequisites to run the application (TO DO) -
+5. Prerequisites to run the application - Docker
 
-5. Instructions on how to run the application locally (TO DO) -
+6. Instructions on how to run the application locally -
+   a. git clone https://github.com/AaronAmha/CookBook.git and extract files
+   b. Run Docker
+   c. Open a Terminal
+   d. Navigate to /cookbook/all project code/components/src in the terminal
+   e. Run docker compose up -d in the terminal
+   f. Once the container in docker is up, navigate to http://localhost:3000/
 
-6. How to run the tests (TO DO) -
+8. How to run the tests (TO DO) - 
 
-7. Link to the deployed application (TO DO) -
+9. Link to the deployed application (TO DO) -
