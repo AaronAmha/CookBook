@@ -418,6 +418,12 @@ app.get('/discover', async (req, res) => {
     {
       req.session.query = "";
     }
+
+    if (req.session.sortbylikes == null)
+    {
+      req.session.sortbylikes = false;
+    }
+
     // Fetch recipes from the API
     await getApiRecipes(req.session.query || '', req);
     console.log(req.session.query);
@@ -427,11 +433,28 @@ app.get('/discover', async (req, res) => {
     if (req.session.query != null)
     {
       var string = "%" + req.session.query + "%";
-      allRecipes = await db.any("SELECT * FROM recipes where UPPER(title) like UPPER($1) ORDER BY title ASC", [string]);
+
+      if (req.session.sortbylikes)
+      {
+        allRecipes = await db.any("SELECT * FROM recipes where UPPER(title) like UPPER($1) ORDER BY likes DESC", [string]);
+      }
+      else{
+        allRecipes = await db.any("SELECT * FROM recipes where UPPER(title) like UPPER($1) ORDER BY title ASC", [string]);
+      }
+
+      
     }
     else
     {
-      allRecipes = await db.any("SELECT * FROM recipes ORDER BY title ASC");
+      if (req.session.sortbylikes)
+      {
+        allRecipes = await db.any("SELECT * FROM recipes ORDER BY likes DESC");
+      }
+      else
+      {
+        allRecipes = await db.any("SELECT * FROM recipes ORDER BY title ASC");
+      }
+      
     }
 
     
@@ -482,16 +505,26 @@ app.get('/discover', async (req, res) => {
       const insertLikeState = await db.query('INSERT INTO likes (username, likeState, recipe_id) VALUES ($1, $2, $3) RETURNING *', [req.session.user.username, likeState, recipe.recipe_id]);
       
     }
-    res.render('pages/discover', { recipes: finalResults.recipes, searchQuery : req.session.query });
+    res.render('pages/discover', { recipes: finalResults.recipes, searchQuery : req.session.query , sortbylikes : req.session.sortbylikes});
   } catch (error) {
     console.error(error);
-    res.render('pages/discover', { recipes: [], searchQuery : "", error: 'Error fetching recipes' });
+    res.render('pages/discover', { recipes: [], searchQuery : "", error: 'Error fetching recipes', sortbylikes : req.session.sortbylikes });
   }
 });
 
 app.post('/discover', async (req, res) => {
   req.session.query = req.body.query;
   console.log(req.session.query);
+  res.redirect('/discover');
+});
+
+app.post('/discover/sortbylikes', async (req, res) => {
+  req.session.sortbylikes = true;
+  res.redirect('/discover');
+});
+
+app.post('/discover/dontsortbylikes', async (req, res) => {
+  req.session.sortbylikes = false;
   res.redirect('/discover');
 });
 
