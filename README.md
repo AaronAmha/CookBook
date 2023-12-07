@@ -17,11 +17,17 @@ Sarah Sharroufna
 5. Prerequisites to run the application - Docker
 
 6. Instructions on how to run the application locally -
+   
    a. git clone https://github.com/AaronAmha/CookBook.git and extract files
+   
    b. Run Docker
+   
    c. Open a Terminal
+   
    d. Navigate to /cookbook/all project code/components/src in the terminal
+   
    e. Run docker compose up -d in the terminal
+   
    f. Once the container in docker is up, navigate to http://localhost:3000/
 
 8. How to run the tests (TO DO) - 
