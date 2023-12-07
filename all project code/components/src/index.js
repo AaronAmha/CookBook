@@ -649,19 +649,41 @@ const upload = multer({ storage: storage });
 
 
 app.post('/addRecipe', upload.single('image'), async (req, res) => {
-  const { name, ingredients, instructions } = req.body;
+  const {name, instructions, ingredientCount} = req.body;
+  let ingredients = [];
+  for (let x = 0; x < ingredientCount.length; x++)
+  {
+    ;
+    let ingredient = req.body["ingredient_" + x];
+    let quantity = req.body["quantity_" + x];
+    let unit = req.body["unit_" + x];
+    if (ingredient && quantity && unit)
+    {
+      ingredients.push({ingredient, quantity, unit});
+    }
+  }
   const image = req.file ? req.file.filename : null; // Only store the file name
   const likes = 0; // Default number of likes
   const getCustomCount = await db.query('select count(*) from recipes where customRecipe=1');
   console.log(getCustomCount);
   const newId = - (parseInt(getCustomCount[0].count) + 1);
   try {
+      const groceries = ingredients.map(item => item.ingredient);
+
+      var groceriesString = "";
+      for (let i = 0; i < ingredients.length; i++)
+      {
+        var line = ingredients[i].quantity + " " + ingredients[i].unit + " " + ingredients[i].ingredient;
+        groceriesString += line;
+        groceriesString += "\n";
+      }
+
       const insertQuery = `
           INSERT INTO recipes (recipe_id, title, ingredients, instructions, image, likes, customRecipe, username)
           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
           RETURNING recipe_id;`;
 
-      const result = await db.one(insertQuery, [newId, name, ingredients, instructions, image, likes, 1, req.session.user.username]);
+      const result = await db.one(insertQuery, [newId, name, groceriesString, instructions, image, likes, 1, req.session.user.username]);
       res.redirect(`/discover`);
   } catch (error) {
       console.error('Error adding recipe:', error);
@@ -773,7 +795,7 @@ app.post('/addRecipe', upload.single('image'), async (req, res) => {
 app.get('/recipe/:id', async (req, res) => {
   const recipeId = req.params.id;
   console.log("Requested recipe ID:", recipeId);
-
+  var customRecipe = true;
   try {
     let recipeInfo = await db.oneOrNone('SELECT * FROM recipes WHERE recipe_id = $1', [recipeId]);
     console.log("Recipe info from DB:", recipeInfo);
@@ -788,6 +810,7 @@ app.get('/recipe/:id', async (req, res) => {
         },
       });
       recipeInfo = response.data;
+      customRecipe = false;
       console.log("Recipe info from API:", recipeInfo);
     }
 
@@ -796,7 +819,16 @@ app.get('/recipe/:id', async (req, res) => {
 
     // Now ensure that recipeInfo has the necessary fields for your template
     // If certain fields are expected to be arrays, make sure to provide them as arrays
-    recipeInfo.ingredients = recipeInfo.ingredients || [];
+
+    if (customRecipe)
+    {
+      recipeInfo.ingredients = recipeInfo.ingredients.split(/\r?\n|\r|\n/g);
+    }
+    else
+    {
+      recipeInfo.ingredients = recipeInfo.ingredients || [];
+    }
+  
     recipeInfo.instructions = recipeInfo.instructions || [];
 
     var likeState;
