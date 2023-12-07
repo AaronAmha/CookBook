@@ -14,9 +14,9 @@
     <div class="container my-4">
         <h3 class="mb-4">Favorites</h3>
         <div id="DiscoverCards" class="row">
+            <div class="row row-cols-1 row-cols-md-2"> 
                 <% for (let recipe of recipes) { %>
-                    <div class="col-md-4">
-                        <div class="card">
+                        <div class="card" style="width: 18rem;">
                             <% if (recipe.image) { %>
                                 <% if (recipe.image.startsWith('http')) { %>
                                     <!-- If the image is an external link, use it as is -->
@@ -45,8 +45,8 @@
                                 </p>   
                             </div>
                         </div>
-                    </div>
                 <% } %>
+        </div>
         </div>
     </div>
 </main>

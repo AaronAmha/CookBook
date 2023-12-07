@@ -13,6 +13,9 @@
     <div class="row">
         <div class="col-md-8">
             <div class="card">
+                <div class="card-body">
+
+               
                     <% if (data.recipeInfo.image != null) {%>
                         <img src="<%= data.recipeInfo.image.startsWith('http') ? data.recipeInfo.image : '/uploads/' + data.recipeInfo.image %>" alt="<%= data.recipeInfo.title %>" class="card-img-top">
                     <% } %>
@@ -21,7 +24,8 @@
                     </h1>
                     <div class="recipe-details">
                         <% if(data.recipeInfo.servings) { %>
-                            <p class="card-text">Servings: <%= data.recipeInfo.servings %>
+                            <p class="card-text">
+                                Servings: <%= data.recipeInfo.servings %>
                             </p>
                         <% } %>
                         <% if(data.recipeInfo.readyInMinutes) { %>
@@ -128,7 +132,6 @@
                             </form>
                         <% } %>
                     <% } %>
-
                 </div>
             </div>
         </div>
