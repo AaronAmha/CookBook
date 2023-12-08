@@ -2,9 +2,9 @@
 Software Development CSCI 3308 Group Project
 
 1. Application Description
-The application allows users to share their recipes with others as well as get ideas for recipes from an external API called Spoonacular. Users are able to upload photos of their final dishes and add ingredients/instructions. Users will be able to like or dislike the recipes posted on the page, and the recipes can be sorted by most liked.
+The application allows users to share their recipes with others as well as get ideas for recipes from an external API called Spoonacular. Users are able to upload photos of their final dishes and add ingredients/instructions. Users are able to like or dislike the recipes posted on the page, and the recipes can be sorted by most liked.
 Additionally, users can favorite recipes, which will cause the recipe to be shown in the Favorites tab.
-Finally, users can look at their profile page, which will provide all their information and a slideshow of their recipes. 
+Finally, users can look at their profile page, which will provide all their information and a profile picture. 
 
 3. Contributers -
 Aaron Amha
