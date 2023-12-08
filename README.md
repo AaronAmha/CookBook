@@ -6,7 +6,8 @@
 
 
 
-🤝 Contributors
+
+👥 Contributors
 -------------
 
 - 👤 [Aaron Amha](https://github.com/AaronAmha)
