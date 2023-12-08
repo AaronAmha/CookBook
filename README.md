@@ -1,7 +1,7 @@
 <h1 align = 'center'> Welcome To CookBook 📖👋 </h1>
 
 <p align='center'> 
-  💻CSCI 3308 Recitation 16 - Group 04 Project 
+  💻 CSCI 3308 Recitation 16 - Group 04 Project 
 </p>
 
 
