@@ -2,11 +2,12 @@
 Software Development CSCI 3308 Group Project
 
 1. Application Description
+
 The application allows users to share their recipes with others as well as get ideas for recipes from an external API called Spoonacular. Users are able to upload photos of their final dishes and add ingredients/instructions. Users are able to like or dislike the recipes posted on the page, and the recipes can be sorted by most liked.
 Additionally, users can favorite recipes, which will cause the recipe to be shown in the Favorites tab.
 Finally, users can look at their profile page, which will provide all their information and a profile picture. 
 
-3. Contributers -
+2. Contributers -
    
    Aaron Amha
    
@@ -16,11 +17,11 @@ Finally, users can look at their profile page, which will provide all their info
    
    Sarah Sharroufna
 
-5. Technology Stack - HTML, JavaScript, SQL, Docker, Spoonacular, Microsoft Azure
+3. Technology Stack - HTML, JavaScript, SQL, Docker, Spoonacular, Microsoft Azure
 
-6. Prerequisites to run the application - Docker
+4. Prerequisites to run the application - Docker
 
-7. Instructions on how to run the application locally -
+5. Instructions on how to run the application locally -
    
    a. git clone https://github.com/AaronAmha/CookBook.git and extract files
    
@@ -34,6 +35,6 @@ Finally, users can look at their profile page, which will provide all their info
    
    f. Once the container in Docker is up, navigate to http://localhost:3000/
 
-8. How to run the tests - There are automated tests that run after running docker compose up -d from above. These tests test the functionality for the login, discover, recipe, and profile pages
+6. How to run the tests - There are automated tests that run after running docker compose up -d from above. These tests test the functionality for the login, discover, recipe, and profile pages
 
-9. Link to the deployed application - http://recitation-16-team-4.eastus.cloudapp.azure.com:3000/
+7. Link to the deployed application - http://recitation-16-team-4.eastus.cloudapp.azure.com:3000/
