@@ -32,4 +32,4 @@ Sarah Sharroufna
 
 8. How to run the tests - There are automated tests that run after running docker compose up -d from above. These tests test the functionality for the login and the discover page. 
 
-9. Link to the deployed application (TO DO) -
+9. Link to the deployed application - http://recitation-16-team-4.eastus.cloudapp.azure.com:3000/
