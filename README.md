@@ -19,7 +19,7 @@
 -----------------
 
 * [Brief Application Description ](#BriefApplicationDescription)
-* [Technology Stack](#Tech)
+* [Technology Stack](#tech-stack)
 * [Prerequisites - Installations](#Installation)
 * [Instructions](#Instructions)
 * [How To Run Tests](#Running)
@@ -42,7 +42,7 @@ Lastly, the project includes a logout button, which allows users to securely log
 In summary, CookBook provides a platform for foodies and culinary enthusiasts to come together, share ideas, and interact with recipes, all while drawing inspiration from the success of Facebook's social media model. Users have personalized profiles showcasing their contributions and favorite recipes, creating a vibrant culinary community.
 
 
-## 📱#Tech Stack
+## 📱Tech Stack
 
 **Client:**
 
