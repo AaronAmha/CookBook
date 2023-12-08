@@ -73,12 +73,18 @@ INSERT INTO users (username, password) VALUES
     ('diana', '$2b$10$SomeRandomHashDiana'),
     ('eve', '$2b$10$SeRandomHashDiana');
 
-    INSERT INTO chefs (username, password, first_name, last_name, email, dob, image)
-VALUES
+INSERT INTO chefs (username, password, first_name, last_name, email, dob, image)
+    VALUES
     ('andrew', '$2b$10$CVNZ5EENn7gCVTelNRvIh.3Sl02Js2Zzi6ODrReYBTISQGEL3PXqy', 'Andrew', 'Smith', 'andrew@example.com', '1990-01-01', 'andrew_profile.jpg'),
     ('alice', '$2b$10$SomeRandomHashAlice', 'Alice', 'Johnson', 'alice@example.com', '1992-03-15', 'alice_profile.jpg'),
     ('bob', '$2b$10$SomeRandomHashBob', 'Bob', 'Jones', 'bob@example.com', '1985-07-22', 'bob_profile.jpg'),
     ('charlie', '$2b$10$SomeRandomHashCharlie', 'Charlie', 'Brown', 'charlie@example.com', '1998-12-05', 'charlie_profile.jpg'),
     ('diana', '$2b$10$SomeRandomHashDiana', 'Diana', 'Miller', 'diana@example.com', '1982-09-10', 'diana_profile.jpg'),
     ('eve', '$2b$10$SeRandomHashDiana', 'Eve', 'White', 'eve@example.com', '1995-06-28', 'eve_profile.jpg');
+
+insert into recipes(recipe_id, title, ingredients, instructions, image, likes, customRecipe, username)
+    values
+    ('-1', 'Cake', '1 pinch Flour and 2 pinches Salt', 'Bake the cake', 'cake.jpg', 200, 1, 'andrew'),
+    ('-2', 'Smoothie', '1 oz Limes and 1 pinch Milk', 'Make the smoothie', 'smoothie.jpg', 234, 1, 'alice'),
+    ('-3', 'Lasagna', '1 gal Milk and 1 pinch Milk', 'Make the lasagna', 'lasagna.jpg', 100, 1, 'bob');
 

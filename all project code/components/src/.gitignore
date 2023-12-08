@@ -42,6 +42,15 @@ node_modules/
 jspm_packages/
 uploads/*
 !uploads/.gitkeep
+!uploads/cake.jpg
+!uploads/smoothie.jpg
+!uploads/lasagna.jpg
+!uploads/andrew_profile.jpg
+!uploads/alice_profile.jpg
+!uploads/bob_profile.jpg
+!uploads/charlie_profile.jpg
+!uploads/diana_profile.jpg
+!uploads/eve_profile.jpg
 
 
 # TypeScript v1 declaration files
