@@ -7,16 +7,20 @@ Additionally, users can favorite recipes, which will cause the recipe to be show
 Finally, users can look at their profile page, which will provide all their information and a profile picture. 
 
 3. Contributers -
-Aaron Amha
-Michael Dempsey
-Alex Foucher
-Sarah Sharroufna
+   
+   Aaron Amha
+   
+   Michael Dempsey
+   
+   Alex Foucher
+   
+   Sarah Sharroufna
 
-4. Technology Stack - HTML, JavaScript, SQL, Docker, Spoonacular, Microsoft Azure
+5. Technology Stack - HTML, JavaScript, SQL, Docker, Spoonacular, Microsoft Azure
 
-5. Prerequisites to run the application - Docker
+6. Prerequisites to run the application - Docker
 
-6. Instructions on how to run the application locally -
+7. Instructions on how to run the application locally -
    
    a. git clone https://github.com/AaronAmha/CookBook.git and extract files
    
