@@ -712,7 +712,8 @@ app.get('/myRecipe', async (req, res) => {
 app.post('/addRecipe', upload.single('image'), async (req, res) => {
   const {name, instructions, ingredientCount} = req.body;
   let ingredients = [];
-  for (let x = 0; x < ingredientCount.length; x++)
+  console.log(ingredientCount[0]);
+  for (let x = 0; x < ingredientCount[0]; x++)
   {
     ;
     let ingredient = req.body["ingredient_" + x];
