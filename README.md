@@ -25,7 +25,7 @@
 * [How To Run Tests](#Running)
 * [Deployed Application Link](#Links)
 
-📝 Brief Application Description (Introduction) #BriefApplicationDescription
+📝 #Brief Application Description (Introduction) 
 ------------
 The CookBook project is designed to serve as a social media platform inspired by the most successful social media ever, Facebook. It caters to users interested in cooking and offers seven features aimed at enhancing user quality of life and functionality.
 
@@ -42,7 +42,7 @@ Lastly, the project includes a logout button, which allows users to securely log
 In summary, CookBook provides a platform for foodies and culinary enthusiasts to come together, share ideas, and interact with recipes, all while drawing inspiration from the success of Facebook's social media model. Users have personalized profiles showcasing their contributions and favorite recipes, creating a vibrant culinary community.
 
 
-## 📱Tech Stack
+## 📱#Tech Stack
 
 **Client:**
 
