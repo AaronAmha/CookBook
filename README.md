@@ -21,10 +21,9 @@
 * [Brief Application Description ](#BriefApplicationDescription)
 * [Technology Stack](#Tech)
 * [Prerequisites - Installations](#Installation)
-* [Instructions](#contributing)
+* [Instructions](#Instructions)
 * [How To Run Tests](#Running)
-* [Deployed Application Link](#authors-and-history)
-* [Acknowledgments](#acknowledgments)
+* [Deployed Application Link](#Links)
 
 📝 Brief Application Description (Introduction)
 ------------
