@@ -1,3 +1,30 @@
+v1.1.2 Latest
+
+What's Changed
+need to pull from main by @AlexFoucher in #28
+pulling from main by @AlexFoucher in #29
+Added a comment by @SarahSharroufna in #34
+sarah by @AaronAmha in #35
+Fixed Test Cases by @mide5396 in #36
+Updated Team Meeting Logs by @mide5396 in #37
+Comment Section by @SarahSharroufna in #39
+Fixed instructions and summary on recipe page by @mide5396 in #40
+Fixed tests and instructions by @mide5396 in #41
+Added favorite page by @mide5396 in #44
+Added like and dislikes by @mide5396 in #46
+Added My Recipes tab, retain search query after favoriting, bug fixes by @mide5396 in #47
+Remove images from uploads by @mide5396 in #48
+Remove node_modules by @mide5396 in #49
+Empty Upload Folder by @mide5396 in #50
+Fixed passing in recipe id by @mide5396 in #51
+Added padding to recipe page, adjusted card layout on discovery by @mide5396 in #52
+Combined Alex and Aaron's AddRecipe page by @mide5396 in #53
+Added extra test case by @mide5396 in #54
+Fixed footer by @mide5396 in #60
+New Contributors
+@SarahSharroufna made their first contribution in #34
+
+
 v1.1.0
 
 What's Changed
@@ -12,3 +39,10 @@ pull request by @AaronAmha in #26
 New Contributors
 @AlexFoucher made their first contribution in #23
 
+
+CookBook
+
+What's Changed
+Added login and partials by @mide5396 in #7
+New Contributors
+@mide5396 made their first contribution in #7
