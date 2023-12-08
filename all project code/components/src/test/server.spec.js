@@ -123,26 +123,23 @@ describe('Viewing Recipes', () => {
   });
 });
 
-describe('Favorites', () => {
-  it('Positive: /favorite with valid recipe ID', done => {
+describe('Test Profiles', () => {
+  it('Positive: /otherUsersProfile with valid recipe ID', done => {
     user
-      .get('http://localhost:3000/recipe/782585?')
+      .get('http://localhost:3000/otherUsersProfile/andrew')
       .end(function(err, res){
         //console.log(res.text);
-        expect(res).to.have.status(200);
-        expect(res.text).to.not.include("No ingredients information available.");
+        expect(res.text).to.include("Welcome");
+
         done();
       });
   });
 
-    // Negative Test Case
-  it('Negative: /recipe with invalid recipe ID', done => {
+  it('Negative: /otherUsersProfile with invalid recipe ID', done => {
     user
-      .get('http://localhost:3000/recipe/undefined?')
-      .end((err, res) => {
-        //console.log(rest\);
-        expect(res).to.have.status(200);
-        expect(res.text).to.include("No ingredients information available.");
+      .get('http://localhost:3000/otherUsersProfile/undefined')
+      .end(function(err, res){
+        expect(res).to.have.status(500);
         done();
       });
   });

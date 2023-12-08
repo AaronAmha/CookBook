@@ -290,6 +290,12 @@ app.post('/discover/favorite', async (req, res) =>{
 
 app.post('/discover/unfavorite', async (req, res) =>{
   const recipe_id = req.body.favorite;
+
+  if (!req.body.favorite.isInteger())
+  {
+    res.redirect('/discover');
+  }
+
   console.log(recipe_id);
   const deleteFav = "delete from favorites where recipe_id = $1 and username = $2;";
   await db.one(deleteFav, [recipe_id, req.session.user.username])
