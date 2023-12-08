@@ -10,12 +10,12 @@
 👥 Contributors
 -------------
 
-- 👤👨‍🍳 [Aaron Amha](https://github.com/AaronAmha)
-- 👤👨‍🍳 [Alex Foucher](https://github.com/AlexFoucher)
-- 👤👨‍🍳 [Michael Dempsey](https://github.com/mide5396)
-- 👤👩‍🍳 [Sarah Sharroufna](https://github.com/SarahSharroufna)
+- 👨‍🍳 [Aaron Amha](https://github.com/AaronAmha)
+- 👨‍🍳 [Alex Foucher](https://github.com/AlexFoucher)
+- 👨‍🍳 [Michael Dempsey](https://github.com/mide5396)
+- 👩‍🍳 [Sarah Sharroufna](https://github.com/SarahSharroufna)
 
-📋Table of contents
+📋 Table of contents
 -----------------
 
 * [Brief Application Description ](#BriefApplicationDescription)
@@ -26,7 +26,7 @@
 * [Deployed Application Link](#authors-and-history)
 * [Acknowledgments](#acknowledgments)
 
-📝Brief Application Description (Introduction)
+📝 Brief Application Description (Introduction)
 ------------
 The CookBook project is designed to serve as a social media platform inspired by the most successful social media ever, Facebook. It caters to users interested in cooking and offers seven features aimed at enhancing user quality of life and functionality.
 
@@ -84,7 +84,7 @@ In summary, CookBook provides a platform for foodies and culinary enthusiasts to
 
 
 
-## ⚙️Installation
+## ⚙️ Installation
 
 Install CookBook with npm
 
@@ -156,7 +156,7 @@ volumes:
   group-project:
 ```
 
-## 📋Instructions
+## 📋 Instructions
 
 *   Clone The Repository: 
 
@@ -173,7 +173,7 @@ volumes:
 *   In Default Search Engine (Chrome, Edge), Run:
 
         http://localhost:3000/
-## R🧪unning Tests
+## 🧪 Running Tests
 
 To run tests, run the following command
 
@@ -188,5 +188,6 @@ To run tests, run the following command
 
 **💻 Docker Compose**
 [![Local](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)](http://localhost:3000/)
+
 **☁ Azure Cloud Deployment**
 [![Azure Cloud Deployment ](https://img.shields.io/badge/microsoft%20azure-0089D6?style=for-the-badge&logo=microsoft-azure&logoColor=white)](http://recitation-16-team-4.eastus.cloudapp.azure.com:3000/)
