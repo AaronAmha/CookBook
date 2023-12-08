@@ -1,7 +1,7 @@
-<h1 align = 'center'> Welcome To CookBook 👋 </h1>
+<h1 align = 'center'> Welcome To CookBook 📖👋 </h1>
 
 <p align='center'> 
-  CSCI 3308 Recitation 16 - Group 04 Project 
+  💻CSCI 3308 Recitation 16 - Group 04 Project 
 </p>
 
 
@@ -10,12 +10,12 @@
 👥 Contributors
 -------------
 
-- 👤 [Aaron Amha](https://github.com/AaronAmha)
-- 👤 [Alex Foucher](https://github.com/AlexFoucher)
-- 👤 [Michael Dempsey](https://github.com/mide5396)
-- 👤 [Sarah Sharroufna](https://github.com/SarahSharroufna)
+- 👤👨‍🍳 [Aaron Amha](https://github.com/AaronAmha)
+- 👤👨‍🍳 [Alex Foucher](https://github.com/AlexFoucher)
+- 👤👨‍🍳 [Michael Dempsey](https://github.com/mide5396)
+- 👤👩‍🍳 [Sarah Sharroufna](https://github.com/SarahSharroufna)
 
-Table of contents
+📋Table of contents
 -----------------
 
 * [Brief Application Description ](#BriefApplicationDescription)
@@ -26,7 +26,7 @@ Table of contents
 * [Deployed Application Link](#authors-and-history)
 * [Acknowledgments](#acknowledgments)
 
-Brief Application Description (Introduction)
+📝Brief Application Description (Introduction)
 ------------
 The CookBook project is designed to serve as a social media platform inspired by the most successful social media ever, Facebook. It caters to users interested in cooking and offers seven features aimed at enhancing user quality of life and functionality.
 
@@ -43,7 +43,7 @@ Lastly, the project includes a logout button, which allows users to securely log
 In summary, CookBook provides a platform for foodies and culinary enthusiasts to come together, share ideas, and interact with recipes, all while drawing inspiration from the success of Facebook's social media model. Users have personalized profiles showcasing their contributions and favorite recipes, creating a vibrant culinary community.
 
 
-## Tech Stack
+## 📱Tech Stack
 
 **Client:**
 
@@ -84,7 +84,7 @@ In summary, CookBook provides a platform for foodies and culinary enthusiasts to
 
 
 
-## Installation
+## ⚙️Installation
 
 Install CookBook with npm
 
@@ -156,7 +156,7 @@ volumes:
   group-project:
 ```
 
-## Instructions
+## 📋Instructions
 
 *   Clone The Repository: 
 
@@ -173,7 +173,7 @@ volumes:
 *   In Default Search Engine (Chrome, Edge), Run:
 
         http://localhost:3000/
-## Running Tests
+## R🧪unning Tests
 
 To run tests, run the following command
 
