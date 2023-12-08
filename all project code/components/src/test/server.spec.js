@@ -111,7 +111,32 @@ describe('Viewing Recipes', () => {
   });
 
     // Negative Test Case
-  it('Negative: /discover with invalid query', done => {
+  it('Negative: /recipe with invalid recipe ID', done => {
+    user
+      .get('http://localhost:3000/recipe/undefined?')
+      .end((err, res) => {
+        //console.log(rest\);
+        expect(res).to.have.status(200);
+        expect(res.text).to.include("No ingredients information available.");
+        done();
+      });
+  });
+});
+
+describe('Favorites', () => {
+  it('Positive: /favorite with valid recipe ID', done => {
+    user
+      .get('http://localhost:3000/recipe/782585?')
+      .end(function(err, res){
+        //console.log(res.text);
+        expect(res).to.have.status(200);
+        expect(res.text).to.not.include("No ingredients information available.");
+        done();
+      });
+  });
+
+    // Negative Test Case
+  it('Negative: /recipe with invalid recipe ID', done => {
     user
       .get('http://localhost:3000/recipe/undefined?')
       .end((err, res) => {
