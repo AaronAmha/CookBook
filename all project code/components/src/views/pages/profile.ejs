@@ -16,12 +16,26 @@
         <div class="row align-items-center">
             <div class="col-3 p-2">
                 <!-- <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" class="img-thumbnail" alt="Blank Pic"> -->
-                <img src="<%= chef.profilePic ? chef.profilePic :'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png' %>" class="img-thumbnail" alt="Profile Pic">
-                <form action="/uploadProfilePicture" method="POST" enctype="multipart/form-data">
+                <!-- <img src="<%= chef.profilePic ? chef.profilePic : '/DefaultProfilePicture.png' %>" class="img-thumbnail" alt="Profile Pic"> -->
+                <!-- <form action="/uploadProfilePicture" method="POST" enctype="multipart/form-data">
                     <input type="file" name="image" accept="image/*">
-                    <button type="submit">Upload</button>
-                </form>
-                
+                    <button type="submit">Upload</button
+                </form> -->
+         
+                <% if (chef.image) { %>
+                    <% if (chef.image.startsWith('http')) { %>
+                        <!-- If the image is an external link, use it as is -->
+                        <img src="<%= chef.image %>" class="card-img-top" alt="<%= chef.first_name%> pic">
+                    <% } else { %>
+                        <!-- If the image is a filename, prepend the path to the uploads directory -->
+                        <img src="/uploads/<%= chef.image %>" class="card-img-top" alt="<%= chef.first_name%> pic">
+                    <% } %>
+                <% } else { %>
+                    <!-- If there is no image, use a default placeholder image -->
+                    <img src="/default-image.jpg" class="card-img-top" alt="Recipe Image">
+                <% } %>
+                    <!-- Add more details as needed -->
+                </div>
             </div>
             <div class="col">
                 <!-- THE REST OF YOUR HTML CODE GOES HERE -->
