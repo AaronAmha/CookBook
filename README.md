@@ -18,12 +18,12 @@
 📋 Table of contents
 -----------------
 
-* [Brief Application Description ](#BriefApplicationDescription)
+* [Brief Application Description ](#-brief-application-description-introduction)
 * [Technology Stack](#tech-stack)
-* [Prerequisites - Installations](#Installation)
-* [Instructions](#Instructions)
-* [How To Run Tests](#Running)
-* [Deployed Application Link](#Links)
+* [Prerequisites - Installations](#%EF%B8%8F-installation)
+* [Instructions](#-instructions)
+* [How To Run Tests](#-running-tests)
+* [Deployed Application Link](#-links)
 
 📝 #Brief Application Description (Introduction) 
 ------------
