@@ -89,7 +89,17 @@ app.get("/", (req, res) => {
   res.redirect("/login");
 });
 
+// Configure Multer to handle file uploads
+const storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+      cb(null, 'uploads/'); // Ensure this directory exists
+  },
+  filename: function(req, file, cb) {
+      cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+  }
+});
 
+const upload = multer({ storage: storage });
 
 app.get('/register', (req, res) => {
 
@@ -97,23 +107,43 @@ app.get('/register', (req, res) => {
 });
 
 // Register
-app.post('/register', async (req, res) => {
+app.post('/register', upload.single('image'), async (req, res) => {
    //hash the password using bcrypt library
    const {first_name, last_name, email, dob, username, password} = req.body;
    const hash = await bcrypt.hash(req.body.password, 10);
+   const image = req.file ? req.file.filename : null; // Only store the file name
    
+
+   const insertUserQuery = `
+   INSERT INTO users (username, password)
+   VALUES ($1, $2)
+   RETURNING username;`;
+   
+  const insertChefQuery = `
+  INSERT INTO chefs (username, password, first_name, last_name, email, dob, image)
+  VALUES ($1, $2, $3, $4, $5, $6, $7)
+  RETURNING chefID;`;
    // To-DO: Insert username and hashed password into the 'users' table
    try 
-   {
-      const user = await db.query('INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *', [username, hash]);
-      const chef = await db.query('INSERT INTO chefs (username, password, first_name, last_name, email, dob) VALUES ($1, $2, $3, $4, $5, $6) RETURNING * ', [username, hash, first_name, last_name, email, dob]);
-      res.redirect('/login');
-   } catch (error)
-   {
-      console.error(error);
-      res.redirect('/register');
-   }
- });
+   {    
+    const newUser = await db.one(insertUserQuery, [username, hash]);
+    const result = await db.one(insertChefQuery, [username, hash, first_name, last_name, email, dob, image]);
+    res.redirect('/login');
+  } catch (error) {
+  console.error('Error adding new account:', error);
+  res.render('pages/register', { message: 'Failed to add new account. Please try again.' });
+  }
+  });
+
+//       const user = await db.query('INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *', [username, hash]);
+//       const chef = await db.query('INSERT INTO chefs (username, password, first_name, last_name, email, dob, image) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING * ', [username, hash, first_name, last_name, email, dob, image]);
+//       res.redirect('/login');
+//    } catch (error)
+//    {
+//       console.error(error);
+//       res.redirect('/register');
+//    }
+//  });
 
 app.get('/login', (req, res) => {
   //do something
@@ -166,14 +196,9 @@ app.use(auth);
 
 app.get('/profile', async(req, res) => {
   //do something
-  try
-  {
+
     const myProfile = await db.oneOrNone('SELECT * FROM chefs WHERE username = $1', [req.session.user.username]);
     res.render("pages/profile", { chef: myProfile});  
-  }
-  catch(error) {
-    console.error(error);
-  }
 });
 
 app.get('/otherUsersProfile/:username', async(req, res) => {
@@ -205,30 +230,30 @@ app.get('/otherUsersProfile/:username', async(req, res) => {
 //   }
 //   image.mv(uploadPath + image.name);
 
-app.post('/uploadProfilePicture', async(req, res) => {
-  try { 
-    console.log(req.files);
-    const image = req.files.image;
-    if (!image) 
-    {
-      return res.sendStatus(400);
-    }
-    const uploadPath = __dirname + '/resources/profilePic/';
-    if (!fs.existsSync(uploadPath)){
-      fs.mkdirSync(uploadPath);
-    }
-      image.mv(uploadPath + image.name);
+// app.post('/uploadProfilePicture', async(req, res) => {
+//   try { 
+//     console.log(req.files);
+//     const image = req.files.image;
+//     if (!image) 
+//     {
+//       return res.sendStatus(400);
+//     }
+//     const uploadPath = __dirname + '/resources/profilePic/';
+//     if (!fs.existsSync(uploadPath)){
+//       fs.mkdirSync(uploadPath);
+//     }
+//       image.mv(uploadPath + image.name);
 
-      // const imgPath = uploadPath + image.name;
-      const pic = await db.query('UPDATE chefs SET profilePic = $1 WHERE username = $2', [uploadPath, req.session.user.username]);
-      // req.session.chefs.profilePic = pic;
-      // req.session.save();
-      res.redirect('/profile');
+//       // const imgPath = uploadPath + image.name;
+//       const pic = await db.query('UPDATE chefs SET image = $1 WHERE username = $2', [uploadPath, req.session.user.username]);
+//       // req.session.chefs.profilePic = pic;
+//       // req.session.save();
+//       res.redirect('/profile');
 
-  } catch (error) {
-    console.error(error);
-  }
-});
+//   } catch (error) {
+//     console.error(error);
+//   }
+// });
 
 
 app.get("/logout", (req, res) => {
@@ -666,16 +691,16 @@ app.get('/myRecipe', async (req, res) => {
 
 
 // Configure Multer to handle file uploads
-const storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        cb(null, 'uploads/'); // Ensure this directory exists
-    },
-    filename: function(req, file, cb) {
-        cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
-    }
-});
+// const storage = multer.diskStorage({
+//     destination: function(req, file, cb) {
+//         cb(null, 'uploads/'); // Ensure this directory exists
+//     },
+//     filename: function(req, file, cb) {
+//         cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+//     }
+// });
 
-const upload = multer({ storage: storage });
+// const upload = multer({ storage: storage });
 
 
 app.post('/addRecipe', upload.single('image'), async (req, res) => {

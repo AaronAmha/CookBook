@@ -24,7 +24,7 @@ CREATE TABLE chefs (
     last_name VARCHAR(50) NOT NULL,
     email VARCHAR(100) NOT NULL,
     dob DATE NOT NULL,
-    profilePic VARCHAR(255),
+    image VARCHAR(255),
     FOREIGN KEY (username) REFERENCES users(username) 
 );
 
@@ -73,7 +73,7 @@ INSERT INTO users (username, password) VALUES
     ('diana', '$2b$10$SomeRandomHashDiana'),
     ('eve', '$2b$10$SeRandomHashDiana');
 
-    INSERT INTO chefs (username, password, first_name, last_name, email, dob, profilePic)
+    INSERT INTO chefs (username, password, first_name, last_name, email, dob, image)
 VALUES
     ('andrew', '$2b$10$CVNZ5EENn7gCVTelNRvIh.3Sl02Js2Zzi6ODrReYBTISQGEL3PXqy', 'Andrew', 'Smith', 'andrew@example.com', '1990-01-01', 'andrew_profile.jpg'),
     ('alice', '$2b$10$SomeRandomHashAlice', 'Alice', 'Johnson', 'alice@example.com', '1992-03-15', 'alice_profile.jpg'),
