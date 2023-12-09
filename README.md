@@ -172,6 +172,9 @@ volumes:
 *   In Default Search Engine (Chrome, Edge), Run:
 
         http://localhost:3000/
+
+*   Otherwise, application should be live on Microsoft Azure:
+        Click On The Microsoft Azure Link Here(#-links) To Be Redirected!
 ## 🧪 Running Tests
 
 To run tests, run the following command
