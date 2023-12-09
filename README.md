@@ -175,8 +175,11 @@ volumes:
 
 *   Otherwise, application should be live on Microsoft Azure:
 
-        Click On The Microsoft Azure Link [Here](#-links) To Be Redirected!
+        Click On The Microsoft Azure Link: 
 
+        * [HERE](#-links)
+
+        To Be Redirected 
 
 ## 🧪 Running Tests
 
