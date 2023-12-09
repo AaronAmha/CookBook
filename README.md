@@ -175,12 +175,12 @@ volumes:
 
 *   Otherwise, application should be live on Microsoft Azure:
 
-        Click On The Microsoft Azure Link: 
+        Click On The Microsoft Azure Link Below To Be Redirected: 
 
-* [HERE](#-links)
 
-        To Be Redirected 
+* [Shortcut To Link](#-links)
 
+        
 ## 🧪 Running Tests
 
 To run tests, run the following command
