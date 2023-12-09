@@ -177,7 +177,7 @@ volumes:
 
         Click On The Microsoft Azure Link: 
 
-        * [HERE](#-links)
+* [HERE](#-links)
 
         To Be Redirected 
 
