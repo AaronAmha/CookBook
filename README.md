@@ -79,7 +79,7 @@ In summary, CookBook provides a platform for foodies and culinary enthusiasts to
 | Parameter | Type     | Description                |  API_KEY:                          |
 | :-------- | :------- | :------------------------- | :------------------------- |
 | `api_key` | `string` | **Required**. Your API key: | '9f0030ca898f4fdbbb89b618bb69f224'|
-
+| `api_key` | `string` | **Required**. Your API key: | 'cb662f80ff4e4e78bad13c787c637a1e'|
 
 
 
