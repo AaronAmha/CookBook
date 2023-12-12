@@ -1,7 +1,7 @@
 <h1 align = 'center'> Welcome To CookBook 📖👋 </h1>
 
 <p align='center'> 
-  💻CSCI 3308 Recitation 16 - Group 04 Project 
+  💻 CSCI 3308 Recitation 16 - Group 04 Project 
 </p>
 
 
@@ -18,15 +18,14 @@
 📋 Table of contents
 -----------------
 
-* [Brief Application Description ](#BriefApplicationDescription)
-* [Technology Stack](#Tech)
-* [Prerequisites - Installations](#Installation)
-* [Instructions](#contributing)
-* [How To Run Tests](#Running)
-* [Deployed Application Link](#authors-and-history)
-* [Acknowledgments](#acknowledgments)
+* [Brief Application Description ](#-brief-application-description-introduction)
+* [Technology Stack](#tech-stack)
+* [Prerequisites - Installations](#%EF%B8%8F-installation)
+* [Instructions](#-instructions)
+* [How To Run Tests](#-running-tests)
+* [Deployed Application Link](#-links)
 
-📝 Brief Application Description (Introduction)
+📝 #Brief Application Description (Introduction) 
 ------------
 The CookBook project is designed to serve as a social media platform inspired by the most successful social media ever, Facebook. It caters to users interested in cooking and offers seven features aimed at enhancing user quality of life and functionality.
 
@@ -80,7 +79,7 @@ In summary, CookBook provides a platform for foodies and culinary enthusiasts to
 | Parameter | Type     | Description                |  API_KEY:                          |
 | :-------- | :------- | :------------------------- | :------------------------- |
 | `api_key` | `string` | **Required**. Your API key: | '9f0030ca898f4fdbbb89b618bb69f224'|
-
+| `api_key` | `string` | **Required**. Your API key: | 'cb662f80ff4e4e78bad13c787c637a1e'|
 
 
 
@@ -173,6 +172,15 @@ volumes:
 *   In Default Search Engine (Chrome, Edge), Run:
 
         http://localhost:3000/
+
+*   Otherwise, application should be live on Microsoft Azure:
+
+        Click On The Microsoft Azure Link Below To Be Redirected: 
+
+
+* [Shortcut To Link](#-links)
+
+        
 ## 🧪 Running Tests
 
 To run tests, run the following command
